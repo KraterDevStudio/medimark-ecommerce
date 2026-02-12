@@ -1,0 +1,72 @@
+[
+  {
+    "id": 1,
+    "name": "Demo User",
+    "email": "user@example.com",
+    "password": "password123",
+    "role": "customer"
+  },
+  {
+    "id": 1770930291887,
+    "name": "John Doe",
+    "email": "john@example.com",
+    "password": "password123",
+    "role": "customer"
+  },
+  {
+    "id": 1770930387739,
+    "name": "Jane Doe",
+    "email": "jane@example.com",
+    "password": "password123",
+    "role": "customer"
+  },
+  {
+    "id": 1770930387556,
+    "name": "Administrator",
+    "email": "admin@admin.com",
+    "password": "admin123",
+    "role": "admin"
+  },
+  {
+    "id": 1770930441884,
+    "name": "Jane 2",
+    "email": "jane2@example.com",
+    "password": "password123",
+    "role": "customer"
+  },
+  {
+    "id": 1770930544411,
+    "name": "Jane 3",
+    "email": "jane3@example.com",
+    "password": "password123",
+    "role": "customer"
+  },
+  {
+    "id": 1770930780623,
+    "name": "Jane 4",
+    "email": "jane4@example.com",
+    "password": "password123",
+    "role": "customer"
+  },
+  {
+    "id": 1770930924171,
+    "name": "Jane 5",
+    "email": "jane5@example.com",
+    "password": "password123",
+    "role": "customer"
+  },
+  {
+    "id": 1770931818810,
+    "name": "Jane 6",
+    "email": "jane6@example.com",
+    "password": "password123",
+    "role": "customer"
+  },
+  {
+    "id": 1770932737932,
+    "name": "John Doe 7",
+    "email": "john7@example.com",
+    "password": "password123",
+    "role": "customer"
+  }
+]

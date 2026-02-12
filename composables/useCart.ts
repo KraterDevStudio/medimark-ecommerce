@@ -43,11 +43,17 @@ export const useCart = () => {
     }
 
     const total = computed(() => {
-        return items.value.reduce((sum, item) => sum + item.price * item.quantity, 0)
+        console.log('Calculating total for items:', items.value)
+        return items.value.reduce((sum, item) => {
+            const price = Number(item.price)
+            const qty = Number(item.quantity)
+            console.log(`Item ${item.id}: price=${item.price} (${price}), qty=${item.quantity} (${qty})`)
+            return sum + (price * qty)
+        }, 0)
     })
 
     const cartCount = computed(() => {
-        return items.value.reduce((sum, item) => sum + item.quantity, 0)
+        return items.value.reduce((sum, item) => sum + Number(item.quantity), 0)
     })
 
     // Formatting utility inside composable for reuse

@@ -1,50 +1,58 @@
 [
-    {
-        "id": 1,
-        "title": "Minimalist Backpack",
-        "price": 120.00,
-        "description": "A clean, functional backpack for everyday use. Durable canvas material with leather accents.",
-        "category": "Accessories",
-        "image": "https://placehold.co/600x400/2a2a2a/FFF?text=Backpack"
-    },
-    {
-        "id": 2,
-        "title": "Wireless Headphones",
-        "price": 250.00,
-        "description": "Noise-cancelling over-ear headphones with premium sound quality and 30-hour battery life.",
-        "category": "Electronics",
-        "image": "https://placehold.co/600x400/2a2a2a/FFF?text=Headphones"
-    },
-    {
-        "id": 3,
-        "title": "Smart Watch Series 5",
-        "price": 399.00,
-        "description": "Stay connected and active with the latest smartwatch technology. Health tracking and notifications.",
-        "category": "Electronics",
-        "image": "https://placehold.co/600x400/2a2a2a/FFF?text=Watch"
-    },
-    {
-        "id": 4,
-        "title": "Leather Wallet",
-        "price": 45.00,
-        "description": "Handcrafted leather wallet with slim profile. Holds 6 cards and cash.",
-        "category": "Accessories",
-        "image": "https://placehold.co/600x400/2a2a2a/FFF?text=Wallet"
-    },
-    {
-        "id": 5,
-        "title": "Mechanical Keyboard",
-        "price": 149.00,
-        "description": "Tactile switches and customizable RGB lighting. Perfect for typing and gaming.",
-        "category": "Electronics",
-        "image": "https://placehold.co/600x400/2a2a2a/FFF?text=Keyboard"
-    },
-    {
-        "id": 6,
-        "title": "Pottery Vase",
-        "price": 35.00,
-        "description": "Modern ceramic vase suitable for dry or fresh flowers. Matte finish.",
-        "category": "Home",
-        "image": "https://placehold.co/600x400/2a2a2a/FFF?text=Vase"
-    }
+  {
+    "id": 1,
+    "title": "Tabla de Dibujo",
+    "price": 120,
+    "description": "A clean, functional backpack for everyday use. Durable canvas material with leather accents.",
+    "category": "Accessories",
+    "image": "https://placehold.co/600x400/2a2a2a/FFF?text=Backpack"
+  },
+  {
+    "id": 2,
+    "title": "Wireless Headphones",
+    "price": 250,
+    "description": "Noise-cancelling over-ear headphones with premium sound quality and 30-hour battery life.",
+    "category": "Electronics",
+    "image": "https://placehold.co/600x400/2a2a2a/FFF?text=Headphones"
+  },
+  {
+    "id": 3,
+    "title": "Smart Watch Series 5",
+    "price": 399,
+    "description": "Stay connected and active with the latest smartwatch technology. Health tracking and notifications.",
+    "category": "Electronics",
+    "image": "https://placehold.co/600x400/2a2a2a/FFF?text=Watch"
+  },
+  {
+    "id": 4,
+    "title": "Lapices de Color Faber Castell",
+    "price": 145,
+    "description": "Un paquete de Lapices Faber Castell",
+    "category": "Lapices",
+    "image": "https://placehold.co/600x400/2a2a2a/FFF?text=LapicesDeColorFaber"
+  },
+  {
+    "id": 5,
+    "title": "Mechanical Keyboard",
+    "price": 149,
+    "description": "Tactile switches and customizable RGB lighting. Perfect for typing and gaming.",
+    "category": "Electronics",
+    "image": "https://placehold.co/600x400/2a2a2a/FFF?text=Keyboard"
+  },
+  {
+    "id": 6,
+    "title": "Lapiz Mecanico",
+    "price": 35,
+    "description": "Modern ceramic vase suitable for dry or fresh flowers. Matte finish.",
+    "category": "Home",
+    "image": "https://placehold.co/600x400/2a2a2a/FFF?text=Vase"
+  },
+  {
+    "id": 1770929049406,
+    "title": "Cartuchera",
+    "price": 250,
+    "category": "Utiles",
+    "image": "https://placehold.co/600x400/2a2a2a/FFF?text=Cartuchera",
+    "description": "Test desc"
+  }
 ]

@@ -10,6 +10,12 @@
               Cart 
               <span v-if="cartCount > 0" class="badge">{{ cartCount }}</span>
             </NuxtLink></li>
+            <li v-if="user">
+              <NuxtLink v-if="user.role === 'admin'" to="/admin">Admin</NuxtLink>
+              <NuxtLink v-else to="/account/orders">Account</NuxtLink>
+            </li>
+            <li v-if="!user"><NuxtLink to="/login">Login</NuxtLink></li>
+            <li v-else><button @click="logout" class="btn-text">Logout</button></li>
           </ul>
         </nav>
       </div>
@@ -29,6 +35,10 @@
 
 <script setup lang="ts">
 const { cartCount } = useCart()
+const { user, logout, initAuth } = useAuth()
+
+initAuth();
+
 </script>
 
 <style scoped>
@@ -58,12 +68,14 @@ const { cartCount } = useCart()
   font-size: 1.5rem;
   font-weight: 800;
   letter-spacing: -0.03em;
+  color: var(--color-primary);
 }
 
 .nav-links {
   display: flex;
   gap: 2rem;
   list-style: none;
+  align-items: center;
 }
 
 .nav-links a {
@@ -101,5 +113,19 @@ const { cartCount } = useCart()
   text-align: center;
   font-size: 0.875rem;
   color: #6b7280;
+}
+
+.btn-text {
+  background: none;
+  border: none;
+  font-weight: 500;
+  color: #4b5563;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0;
+}
+
+.btn-text:hover {
+  color: var(--color-primary);
 }
 </style>

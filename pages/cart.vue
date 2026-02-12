@@ -1,185 +1,182 @@
 <template>
   <div class="container cart-page">
-    <h1 class="page-title">Shopping Cart <span v-if="cartCount > 0">({{ cartCount }})</span></h1>
+    <h1>Your Shopping Cart</h1>
 
     <div v-if="items.length === 0" class="empty-cart">
       <p>Your cart is empty.</p>
-      <NuxtLink to="/" class="btn" style="margin-top: 1rem;">Continue Shopping</NuxtLink>
+      <NuxtLink to="/" class="btn">Start Shopping</NuxtLink>
     </div>
 
-    <div v-else class="cart-layout">
+    <div v-else class="cart-content">
       <div class="cart-items">
         <div v-for="item in items" :key="item.id" class="cart-item">
           <img :src="item.image" :alt="item.title" class="item-image" />
           <div class="item-details">
-            <h3><NuxtLink :to="`/products/${item.id}`">{{ item.title }}</NuxtLink></h3>
-            <p class="item-category">{{ item.category }}</p>
-            <p class="item-price">{{ formatPrice(item.price) }}</p>
+            <h3>{{ item.title }}</h3>
+            <p class="price">{{ formatPrice(item.price) }}</p>
           </div>
           <div class="item-actions">
-            <div class="quantity-control">
-               <button class="qty-btn" @click="updateQuantity(item.id, item.quantity - 1)">-</button>
-               <span class="qty-value">{{ item.quantity }}</span>
-               <button class="qty-btn" @click="updateQuantity(item.id, item.quantity + 1)">+</button>
-            </div>
-            <button class="remove-btn" @click="removeFromCart(item.id)">Remove</button>
+            <input 
+              type="number" 
+              min="1" 
+              :value="item.quantity" 
+              @change="updateQuantity(item.id, Number(($event.target as HTMLInputElement).value))"
+            />
+            <button @click="removeFromCart(item.id)" class="remove-btn">Remove</button>
           </div>
         </div>
       </div>
 
       <div class="cart-summary">
         <h2>Order Summary</h2>
-        <div class="summary-details">
-          <div class="summary-row">
-            <span>Subtotal</span>
-            <span>{{ formatPrice(total) }}</span>
-          </div>
-          <div class="summary-row">
-            <span>Shipping</span>
-            <span>Free</span>
-          </div>
-          <div class="summary-row total">
-            <span>Total</span>
-            <span>{{ formatPrice(total) }}</span>
-          </div>
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span>{{ formatPrice(totalPrice) }}</span>
         </div>
-        <button class="btn btn-block checkout-btn">Proceed to Checkout</button>
+        <div class="summary-row total">
+          <span>Total</span>
+          <span>{{ formatPrice(totalPrice) }}</span>
+        </div>
+        <button @click="checkout" class="btn btn-block" :disabled="loading">
+          {{ loading ? 'Processing...' : 'Proceed to Checkout' }}
+        </button>
+        <button @click="clearCart" class="btn-clear">Clear Cart</button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-const { items, cartCount, removeFromCart, updateQuantity, total, formatPrice } = useCart()
+const { items, removeFromCart, updateQuantity, clearCart, totalPrice, formatPrice } = useCart()
+const { user } = useAuth()
+const router = useRouter()
+const loading = ref(false)
 
-useHead({
-  title: 'Shopping Cart - MediMark'
+onMounted(() => {
+  console.log('Cart Items on Mount:', items.value)
 })
+
+const checkout = async () => {
+  console.log('Checkout clicked')
+  console.log('User:', user.value)
+  console.log('Items:', items.value)
+  console.log('Total:', totalPrice.value)
+  if (!user.value) {
+    if (confirm('You need to login to checkout. Go to login page?')) {
+       router.push('/login')
+    }
+    return
+  }
+
+  if (items.value.length === 0) return
+
+  loading.value = true
+  try {
+    const { success } = await $fetch('/api/orders', {
+      method: 'POST',
+      body: {
+        items: items.value,
+        total: totalPrice.value
+      }
+    })
+
+    if (success) {
+      clearCart()
+      // alert('Order placed successfully!')
+      router.push('/account/orders')
+    }
+  } catch (e: any) {
+    alert(e.statusMessage || 'Checkout failed')
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
 <style scoped>
 .cart-page {
-  padding-top: 3rem;
-  padding-bottom: 4rem;
+  padding: 2rem 0;
 }
 
-.page-title {
-  margin-bottom: 2.5rem;
-  font-size: 2rem;
-  font-weight: 800;
+h1 {
+  margin-bottom: 2rem;
 }
 
 .empty-cart {
   text-align: center;
-  padding: 5rem 2rem;
-  background: var(--color-surface);
-  border-radius: 1rem;
-  margin-top: 2rem;
+  padding: 4rem 0;
+  color: #6b7280;
 }
 
-.cart-layout {
+.empty-cart p {
+  margin-bottom: 1.5rem;
+  font-size: 1.125rem;
+}
+
+.cart-content {
   display: grid;
   grid-template-columns: 1fr 350px;
-  gap: 3rem;
+  gap: 2rem;
 }
 
-@media (max-width: 900px) {
-  .cart-layout {
+@media (max-width: 768px) {
+  .cart-content {
     grid-template-columns: 1fr;
   }
 }
 
 .cart-items {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
 }
 
 .cart-item {
-  display: grid;
-  grid-template-columns: 100px 1fr auto;
-  gap: 1.5rem;
+  display: flex;
   padding: 1.5rem;
-  border: 1px solid var(--color-border);
-  border-radius: 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+  gap: 1.5rem;
   align-items: center;
 }
 
-@media (max-width: 600px) {
-  .cart-item {
-    grid-template-columns: 80px 1fr;
-    grid-template-rows: auto auto;
-  }
-  .item-actions {
-    grid-column: 1 / -1;
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-  }
+.cart-item:last-child {
+  border-bottom: none;
 }
 
 .item-image {
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
   object-fit: cover;
-  border-radius: 0.5rem;
-  background: var(--color-surface);
+  border-radius: 0.25rem;
+}
+
+.item-details {
+  flex: 1;
 }
 
 .item-details h3 {
-  font-size: 1.125rem;
+  font-size: 1rem;
   margin-bottom: 0.25rem;
 }
 
-.item-category {
-  font-size: 0.875rem;
-  color: #6b7280;
-  margin-bottom: 0.5rem;
-}
-
-.item-price {
+.item-details .price {
+  color: var(--color-primary);
   font-weight: 600;
 }
 
 .item-actions {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
   gap: 1rem;
 }
 
-.quantity-control {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+.item-actions input {
+  width: 60px;
+  padding: 0.5rem;
   border: 1px solid var(--color-border);
-  border-radius: 0.5rem;
-  padding: 0.25rem;
-  background: white;
-}
-
-.qty-btn {
-  background: none;
-  border: none;
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: var(--color-text);
-  font-weight: 600;
-}
-
-.qty-btn:hover {
-  color: var(--color-accent);
-}
-
-.qty-value {
-  width: 24px;
+  border-radius: 0.25rem;
   text-align: center;
-  font-variant-numeric: tabular-nums;
-  font-weight: 500;
 }
 
 .remove-btn {
@@ -187,42 +184,58 @@ useHead({
   border: none;
   color: #ef4444;
   cursor: pointer;
-  font-size: 0.875rem;
   text-decoration: underline;
-  padding: 0;
+  font-size: 0.875rem;
 }
 
 .cart-summary {
-  background: var(--color-surface);
-  padding: 2rem;
-  border-radius: 1rem;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-sm);
   height: fit-content;
 }
 
 .cart-summary h2 {
   font-size: 1.25rem;
   margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .summary-row {
   display: flex;
   justify-content: space-between;
   margin-bottom: 1rem;
-  font-size: 0.95rem;
+  color: #4b5563;
 }
 
 .summary-row.total {
   font-weight: 700;
   font-size: 1.25rem;
-  border-top: 1px solid #e5e7eb;
-  padding-top: 1rem;
+  color: var(--color-text);
   margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+  margin-bottom: 1.5rem;
 }
 
 .btn-block {
   width: 100%;
-  margin-top: 1.5rem;
+}
+
+.btn-clear {
+  width: 100%;
+  margin-top: 1rem;
+  background: none;
+  border: 1px solid var(--color-border);
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  color: #6b7280;
+}
+
+.btn-clear:hover {
+  background-color: #f9fafb;
 }
 </style>
