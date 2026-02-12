@@ -111,14 +111,13 @@ const email = ref('')
 const password = ref('')
 const loading = ref(false)
 const error = ref('')
-const { login } = useAuth()
+const { login, user } = useAuth()
+// const user = useSupabaseUser()
 const router = useRouter()
-const route = useRoute()
 
-// Check for redirect message
-onMounted(() => {
-  if (route.query.user) {
-    // maybe show a message?
+watchEffect(() => {
+  if (user.value) {
+    router.push('/')
   }
 })
 
@@ -126,15 +125,16 @@ const handleLogin = async () => {
   loading.value = true
   error.value = ''
   
-  const success = await login({ email: email.value, password: password.value })
-  
-  if (success) {
-    router.push('/')
-  } else {
-    error.value = 'Invalid credentials'
+  try {
+      const success = await login({ email: email.value, password: password.value })
+      if (!success) {
+          error.value = 'Invalid login credentials'
+      }
+  } catch(e) {
+      error.value = 'An error occurred'
+  } finally {
+      loading.value = false
   }
-  
-  loading.value = false
 }
 </script>
 

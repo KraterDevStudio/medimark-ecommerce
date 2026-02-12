@@ -35,9 +35,8 @@
 
 <script setup lang="ts">
 const { cartCount } = useCart()
-const { user, logout, initAuth } = useAuth()
+const { user, logout } = useAuth()
 
-initAuth();
 
 </script>
 

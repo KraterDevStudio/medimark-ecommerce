@@ -1,64 +1,46 @@
 export const useAuth = () => {
-    const user = useState('user', () => null)
+    const supabase = useSupabaseClient()
+    const user = useSupabaseUser()
     const router = useRouter()
 
     const login = async (data: any) => {
-        try {
-            const response = await $fetch('/api/auth', {
-                method: 'POST',
-                body: data // password or email/password
-            })
+        const { error } = await supabase.auth.signInWithPassword({
+            email: data.email,
+            password: data.password
+        })
 
-            if (response.user) {
-                user.value = response.user
-                return true
-            }
-            return false
-        } catch (e) {
-            console.error('Login failed', e)
+        if (error) {
+            console.error('Login failed', error)
             return false
         }
+        return true
     }
 
     const register = async (data: any) => {
-        try {
-            const response = await $fetch('/api/auth/register', {
-                method: 'POST',
-                body: data
-            })
-
-            if (response.user) {
-                user.value = response.user
-                return true
+        const { error } = await supabase.auth.signUp({
+            email: data.email,
+            password: data.password,
+            options: {
+                data: {
+                    name: data.name
+                }
             }
-            return false
-        } catch (e) {
-            console.error('Registration failed', e)
-            throw e
+        })
+
+        if (error) {
+            console.error('Registration failed', error)
+            throw error
         }
+        return true
     }
 
-    const logout = () => {
-        user.value = null
-        const token = useCookie('auth_token')
-        token.value = null
+    const logout = async () => {
+        const { error } = await supabase.auth.signOut()
+        if (error) console.error('Logout failed', error)
         router.push('/login')
     }
 
-    // Check auth status on init
-    const initAuth = () => {
-        // In a real app, we would verify the token with the server here
-        // For this demo, we'll simple check cookie existence and maybe decode if it was JWT
-        const token = useCookie('auth_token')
-        if (token.value) {
-            // Mock restoring session - realistically we'd hit a /me endpoint
-            if (token.value === 'valid-admin-token') {
-                user.value = { username: 'Administrator', role: 'admin' }
-            } else if (token.value.startsWith('valid-user-')) {
-                user.value = { role: 'customer' } // Minimal state restore
-            }
-        }
-    }
+    // No need for initAuth, Supabase handles session restoration automatically
 
-    return { user, login, register, logout, initAuth }
+    return { user, login, register, logout }
 }
