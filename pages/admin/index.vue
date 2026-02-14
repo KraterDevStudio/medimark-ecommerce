@@ -1,18 +1,18 @@
 <template>
   <div class="admin-dashboard">
     <div class="actions-bar">
-      <NuxtLink to="/admin/create" class="btn">Add New Product</NuxtLink>
+      <NuxtLink to="/admin/create" class="btn">Agregar Nuevo Producto</NuxtLink>
     </div>
 
     <div class="table-container">
       <table class="product-table">
         <thead>
           <tr>
-            <th>Image</th>
-            <th>Name</th>
-            <th>Category</th>
-            <th>Price</th>
-            <th>Actions</th>
+            <th>Imagen</th>
+            <th>Nombre</th>
+            <th>Categoría</th>
+            <th>Precio</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -25,8 +25,8 @@
             <td>{{ formatPrice(product.price) }}</td>
             <td>
               <div class="action-buttons">
-                <NuxtLink :to="`/admin/edit/${product.id}`" class="btn-icon edit">Edit</NuxtLink>
-                <button @click="deleteProduct(product.id)" class="btn-icon delete">Delete</button>
+                <NuxtLink :to="`/admin/edit/${product.id}`" class="btn-icon edit">Editar</NuxtLink>
+                <button @click="deleteProduct(product.id)" class="btn-icon delete">Eliminar</button>
               </div>
             </td>
           </tr>
@@ -41,7 +41,7 @@ import type { Product } from '~/composables/useCart'
 
 definePageMeta({
   layout: 'admin',
-  middleware: 'auth'
+  middleware: 'admin'
 })
 
 const { data: products, refresh } = await useFetch<Product[]>('/api/products')

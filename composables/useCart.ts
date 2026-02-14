@@ -21,10 +21,17 @@ export const useCart = () => {
         } else {
             items.value.push({ ...product, quantity: 1 })
         }
+        storeCart()
     }
 
     const removeFromCart = (id: number) => {
         items.value = items.value.filter(i => i.id !== id)
+        storeCart()
+    }
+
+    // auxiliar function to store cart status onto localStorage
+    const storeCart = () => {
+        localStorage.setItem('cart', JSON.stringify(items.value))
     }
 
     const updateQuantity = (id: number, quantity: number) => {
@@ -35,11 +42,13 @@ export const useCart = () => {
             } else {
                 item.quantity = quantity
             }
+            storeCart()
         }
     }
 
     const clearCart = () => {
         items.value = []
+        storeCart()
     }
 
     const total = computed(() => {
@@ -61,5 +70,15 @@ export const useCart = () => {
         return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(price);
     }
 
-    return { items, addToCart, removeFromCart, updateQuantity, clearCart, total, cartCount, formatPrice }
+    // load cart from localStorage, make sure it works on SSR   
+    const loadCart = () => {
+        if (process.server) return
+        const cookies = localStorage.getItem('cart')
+        console.log(cookies)
+        if (cookies) {
+            items.value = JSON.parse(cookies)
+        }
+    }
+
+    return { items, addToCart, removeFromCart, updateQuantity, clearCart, total, cartCount, formatPrice, loadCart }
 }

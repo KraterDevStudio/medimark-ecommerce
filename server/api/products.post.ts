@@ -1,12 +1,28 @@
 import { readBody, createError } from 'h3'
-import fs from 'fs'
-import path from 'path'
-
-const productsPath = path.resolve(process.cwd(), 'server/data/products.json')
+import { serverSupabaseServiceRole, serverSupabaseUser } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
+    // Check if user is admin
+    const user = await serverSupabaseUser(event)
+    if (!user) {
+        throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
+    }
+
+
+    const serviceClient = serverSupabaseServiceRole(event)
+    const { data: profile } = await serviceClient
+        .from('user_profiles')
+        .select('role')
+        .eq('auth_user_id', user.sub)
+        .single()
+
+    if (profile?.role !== 'admin') {
+        throw createError({ statusCode: 403, statusMessage: 'Forbidden: Admin access required' })
+    }
+
     const body = await readBody(event)
 
+    // Validate required fields
     if (!body.title || !body.price) {
         throw createError({
             statusCode: 400,
@@ -14,16 +30,25 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    const products = JSON.parse(fs.readFileSync(productsPath, 'utf-8'))
+    const { data: product, error } = await serviceClient
+        .from('products')
+        .insert({
+            title: body.title,
+            price: Number(body.price),
+            description: body.description || null,
+            category: body.category || null,
+            image: body.image || null
+        })
+        .select()
+        .single()
 
-    const newProduct = {
-        id: Date.now(),
-        ...body,
-        price: Number(body.price)
+    if (error) {
+        throw createError({
+            statusCode: 500,
+            statusMessage: 'Failed to create product',
+            data: error
+        })
     }
 
-    products.push(newProduct)
-    fs.writeFileSync(productsPath, JSON.stringify(products, null, 2))
-
-    return newProduct
+    return product
 })

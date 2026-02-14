@@ -1,1 +1,49 @@
-[]
+[
+  {
+    "id": 1770997018271,
+    "userId": null,
+    "guestEmail": "guest@example.com",
+    "customerInfo": {
+      "name": "Test Guest",
+      "email": "guest@example.com",
+      "phone": "+54 11 1234-5678",
+      "address": "Av. Corrientes 1234",
+      "city": "Buenos Aires",
+      "postalCode": "C1043",
+      "province": "Buenos Aires"
+    },
+    "items": [
+      {
+        "id": 2,
+        "title": "Wireless Headphones",
+        "price": 250,
+        "description": "Noise-cancelling over-ear headphones with premium sound quality and 30-hour battery life.",
+        "category": "Electronics",
+        "image": "https://placehold.co/600x400/2a2a2a/FFF?text=Headphones",
+        "quantity": 2
+      },
+      {
+        "id": 1,
+        "title": "Tabla de Dibujo",
+        "price": 120,
+        "description": "A clean, functional backpack for everyday use. Durable canvas material with leather accents.",
+        "category": "Accessories",
+        "image": "https://placehold.co/600x400/2a2a2a/FFF?text=Backpack",
+        "quantity": 2
+      },
+      {
+        "id": 3,
+        "title": "Smart Watch Series 5",
+        "price": 399,
+        "description": "Stay connected and active with the latest smartwatch technology. Health tracking and notifications.",
+        "category": "Electronics",
+        "image": "https://placehold.co/600x400/2a2a2a/FFF?text=Watch",
+        "quantity": 1
+      }
+    ],
+    "total": 1139,
+    "paymentMethod": "transferencia",
+    "date": "2026-02-13T15:36:58.271Z",
+    "status": "Pending"
+  }
+]

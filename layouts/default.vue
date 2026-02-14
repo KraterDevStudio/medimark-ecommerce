@@ -5,17 +5,17 @@
         <NuxtLink to="/" class="logo">MediMark</NuxtLink>
         <nav>
           <ul class="nav-links">
-            <li><NuxtLink to="/" exact-active-class="active">Shop</NuxtLink></li>
+            <li><NuxtLink to="/" exact-active-class="active">Productos</NuxtLink></li>
             <li><NuxtLink to="/cart" class="cart-link" exact-active-class="active">
-              Cart 
+              Carrito 
               <span v-if="cartCount > 0" class="badge">{{ cartCount }}</span>
             </NuxtLink></li>
             <li v-if="user">
-              <NuxtLink v-if="user.role === 'admin'" to="/admin">Admin</NuxtLink>
-              <NuxtLink v-else to="/account/orders">Account</NuxtLink>
+              <NuxtLink v-if="isAdmin" to="/admin">Admin</NuxtLink>
+              <NuxtLink v-else to="/account/orders">Pedidos</NuxtLink>
             </li>
-            <li v-if="!user"><NuxtLink to="/login">Login</NuxtLink></li>
-            <li v-else><button @click="logout" class="btn-text">Logout</button></li>
+            <li v-if="!user"><NuxtLink to="/login">Cuenta</NuxtLink></li>
+            <li v-else><button @click="logout" class="btn-text">Cerrar Sesión</button></li>
           </ul>
         </nav>
       </div>
@@ -34,9 +34,10 @@
 </template>
 
 <script setup lang="ts">
-const { cartCount } = useCart()
-const { user, logout } = useAuth()
+const { cartCount, loadCart } = useCart()
+const { user, logout, isAdmin} = useAuth()
 
+loadCart()
 
 </script>
 

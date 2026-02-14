@@ -2,25 +2,25 @@
   <div>
     <section class="hero">
       <div class="container">
-        <h1>Welcome to MediMark</h1>
-        <p>Discover our curated collection of premium products.</p>
+        <h1>Bienvenido a MediMark</h1>
+        <p>Descubre nuestra colección curada de productos premium.</p>
         <div class="hero-actions">
-           <button class="btn btn-outline" @click="scrollToProducts">Shop Now</button>
+           <button class="btn btn-outline" @click="scrollToProducts">Comprar Ahora</button>
         </div>
       </div>
     </section>
 
     <section id="products" class="container products-section">
       <div class="section-header">
-         <h2 class="section-title">Latest Arrivals</h2>
-         <p class="section-subtitle">Fresh finds for you</p>
+         <h2 class="section-title">Últimos Productos</h2>
+         <p class="section-subtitle">Descubre lo nuevo</p>
       </div>
 
       <div v-if="status === 'pending'" class="loading">
-        <div class="spinner"></div> Loading products...
+        <div class="spinner"></div> Cargando productos...
       </div>
       <div v-else-if="error" class="error">
-        Failed to load products.
+        Error al cargar productos.
       </div>
       <div v-else class="grid grid-cols-3 product-grid">
         <ProductCard 

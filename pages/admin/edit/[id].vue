@@ -43,7 +43,7 @@ import type { Product } from '~/composables/useCart'
 
 definePageMeta({
   layout: 'admin',
-  middleware: 'auth'
+  middleware: 'admin'
 })
 
 const route = useRoute()

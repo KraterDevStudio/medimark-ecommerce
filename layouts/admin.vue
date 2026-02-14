@@ -10,7 +10,7 @@
         <NuxtLink to="/" target="_blank">View Store</NuxtLink>
       </nav>
       <div class="user-panel">
-        <p>Logged in as <strong>{{ user?.username }}</strong></p>
+        <p>Logged in as <strong>{{ profile?.name || user?.email }}</strong></p>
         <button @click="logout" class="btn-logout">Logout</button>
       </div>
     </aside>
@@ -27,8 +27,20 @@
 </template>
 
 <script setup lang="ts">
-const { user, logout } = useAuth()
+
+const { user, profile, isAdmin, logout, fetchProfile } = useAuth()
 const route = useRoute()
+const router = useRouter()
+
+fetchProfile(user.value.sub)
+// Additional safety check in layout
+onMounted(() => {
+  if (!user.value) {
+    router.push('/login')
+  } else if (!isAdmin.value) {
+    router.push('/')
+  }
+})
 
 const pageTitle = computed(() => {
   if (route.path === '/admin/create') return 'Add New Product'

@@ -1,45 +1,100 @@
 import { readBody, createError } from 'h3'
-import fs from 'fs'
-import path from 'path'
-
-const ordersPath = path.resolve(process.cwd(), 'server/data/orders.json')
+import { serverSupabaseServiceRole } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
-    const token = getCookie(event, 'auth_token')
 
-    if (!token) {
-        throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
-    }
-
-    let userId = null
-    if (token.startsWith('valid-user-')) {
-        userId = Number(token.replace('valid-user-', ''))
-    } else {
-        // Admin or invalid
-        throw createError({ statusCode: 403, statusMessage: 'Only customers can checkout' })
-    }
-
+    // Validate required fields
     if (!body.items || body.items.length === 0) {
         throw createError({ statusCode: 400, statusMessage: 'Cart is empty' })
     }
 
-    let orders = []
-    try {
-        orders = JSON.parse(fs.readFileSync(ordersPath, 'utf-8'))
-    } catch (e) { }
-
-    const newOrder = {
-        id: Date.now(),
-        userId,
-        items: body.items,
-        total: body.total,
-        date: new Date().toISOString(),
-        status: 'Pending'
+    if (!body.customerInfo) {
+        throw createError({ statusCode: 400, statusMessage: 'Customer information is required' })
     }
 
-    orders.push(newOrder)
-    fs.writeFileSync(ordersPath, JSON.stringify(orders, null, 2))
+    const { name, email, phone, address, city, postalCode, province } = body.customerInfo
 
-    return { success: true, orderId: newOrder.id }
+    if (!name || !email || !phone || !address || !city || !postalCode || !province) {
+        throw createError({ statusCode: 400, statusMessage: 'All customer information fields are required' })
+    }
+
+    const client = serverSupabaseServiceRole(event)
+    const token = getCookie(event, 'auth_token')
+
+    // Determine if user is logged in
+    let userId = null
+    let isGuest = true
+
+    if (token) {
+        if (token.startsWith('valid-user-')) {
+            const tokenUserId = Number(token.replace('valid-user-', ''))
+            // Find user profile by legacy ID (we'll need to map this)
+            const { data: userProfile } = await client
+                .from('user_profiles')
+                .select('id')
+                .eq('id', tokenUserId)
+                .single()
+
+            if (userProfile) {
+                userId = userProfile.id
+                isGuest = false
+            }
+        }
+    }
+
+    // Create order
+    const { data: order, error: orderError } = await client
+        .from('orders')
+        .insert({
+            user_id: isGuest ? null : userId,
+            guest_email: isGuest ? email : null,
+            customer_name: name,
+            customer_email: email,
+            customer_phone: phone,
+            customer_address: address,
+            customer_city: city,
+            customer_postal_code: postalCode,
+            customer_province: province,
+            total: body.total,
+            payment_method: body.paymentMethod || 'transferencia',
+            status: 'Pending'
+        })
+        .select()
+        .single()
+
+    if (orderError) {
+        throw createError({
+            statusCode: 500,
+            statusMessage: 'Failed to create order',
+            data: orderError
+        })
+    }
+
+    // Create order items
+    const orderItems = body.items.map((item: any) => ({
+        order_id: order.id,
+        product_id: item.id,
+        product_title: item.title,
+        product_price: item.price,
+        product_image: item.image,
+        quantity: item.quantity,
+        subtotal: item.price * item.quantity
+    }))
+
+    const { error: itemsError } = await client
+        .from('order_items')
+        .insert(orderItems)
+
+    if (itemsError) {
+        // Rollback: delete the order if items fail
+        await client.from('orders').delete().eq('id', order.id)
+        throw createError({
+            statusCode: 500,
+            statusMessage: 'Failed to create order items',
+            data: itemsError
+        })
+    }
+
+    return { success: true, orderId: order.id }
 })
