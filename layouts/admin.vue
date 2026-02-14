@@ -32,7 +32,6 @@ const { user, profile, isAdmin, logout, fetchProfile } = useAuth()
 const route = useRoute()
 const router = useRouter()
 
-fetchProfile(user.value.sub)
 // Additional safety check in layout
 onMounted(() => {
   if (!user.value) {

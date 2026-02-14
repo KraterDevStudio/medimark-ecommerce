@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
     const { data: profile } = await serviceClient
         .from('user_profiles')
         .select('role')
-        .eq('auth_user_id', user.id)
+        .eq('auth_user_id', user.sub)
         .single()
 
     if (profile?.role !== 'admin') {
