@@ -11,9 +11,22 @@
           <label>Price</label>
           <input v-model="form.price" type="number" step="0.01" required />
         </div>
-        <div class="form-group">
-          <label>Category</label>
-          <input v-model="form.category" type="text" required />
+      </div>
+
+      <div class="form-group">
+        <label>Categories</label>
+        <div class="categories-select">
+           <div v-if="loadingCategories">Loading categories...</div>
+           <div v-else class="checkbox-grid">
+             <label v-for="cat in flatCategories" :key="cat.id" class="checkbox-label">
+               <input 
+                 type="checkbox" 
+                 :value="cat.id" 
+                 v-model="form.categoryIds"
+               >
+               {{ cat.name }}
+             </label>
+           </div>
         </div>
       </div>
 
@@ -46,10 +59,28 @@ definePageMeta({
 const router = useRouter()
 const loading = ref(false)
 
+// Fetch categories
+const { data: categories, pending: loadingCategories } = await useFetch('/api/categories')
+
+// Flatten for selection
+const flattenCategories = (cats: any[] | null): any[] => {
+  if (!cats) return []
+  let flat: any[] = []
+  cats.forEach(cat => {
+    flat.push(cat)
+    if (cat.children && cat.children.length > 0) {
+      flat = [...flat, ...flattenCategories(cat.children)]
+    }
+  })
+  return flat
+}
+
+const flatCategories = computed(() => flattenCategories(categories.value || []))
+
 const form = reactive({
   title: '',
   price: '',
-  category: '',
+  categoryIds: [] as number[],
   image: 'https://placehold.co/600x400',
   description: ''
 })
@@ -62,8 +93,8 @@ const saveProduct = async () => {
       body: form
     })
     router.push('/admin')
-  } catch (e) {
-    alert('Error creating product')
+  } catch (e: any) {
+    alert(e.statusMessage || 'Error creating product')
   } finally {
     loading.value = false
   }
@@ -103,7 +134,10 @@ label {
   color: #374151;
 }
 
-input, textarea {
+input[type="text"],
+input[type="number"],
+input[type="url"],
+textarea {
   padding: 0.75rem;
   border: 1px solid var(--color-border);
   border-radius: 0.375rem;
@@ -113,6 +147,32 @@ input, textarea {
 input:focus, textarea:focus {
   outline: 2px solid var(--color-accent);
   border-color: transparent;
+}
+
+.categories-select {
+  border: 1px solid var(--color-border);
+  padding: 1rem;
+  border-radius: 0.375rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.5rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.checkbox-label input {
+  width: auto;
 }
 
 .form-actions {

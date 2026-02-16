@@ -7,7 +7,12 @@
       <h3 class="title">
         <NuxtLink :to="`/products/${product.id}`">{{ product.title }}</NuxtLink>
       </h3>
-      <p class="category">{{ product.category }}</p>
+      <p class="category">
+        <span v-for="(cat, index) in product.categories" :key="cat.id">
+          {{ cat.name }}<span v-if="index < product.categories.length - 1">, </span>
+        </span>
+        <span v-if="!product.categories || product.categories.length === 0">{{ product.category }}</span>
+      </p>
       <div class="footer">
         <span class="price">{{ formatPrice(product.price) }}</span>
         

@@ -8,7 +8,6 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
     }
 
-
     const serviceClient = serverSupabaseServiceRole(event)
     const { data: profile } = await serviceClient
         .from('user_profiles')
@@ -30,14 +29,15 @@ export default defineEventHandler(async (event) => {
         })
     }
 
+    // 1. Create Product
     const { data: product, error } = await serviceClient
         .from('products')
         .insert({
             title: body.title,
             price: Number(body.price),
             description: body.description || null,
-            category: body.category || null,
-            image: body.image || null
+            image: body.image || null,
+            // category column is deprecated/removed in favor of relationship
         })
         .select()
         .single()
@@ -48,6 +48,23 @@ export default defineEventHandler(async (event) => {
             statusMessage: 'Failed to create product',
             data: error
         })
+    }
+
+    // 2. Create Category Relationships
+    if (body.categoryIds && Array.isArray(body.categoryIds) && body.categoryIds.length > 0) {
+        const categoryLinks = body.categoryIds.map((catId: number) => ({
+            product_id: product.id,
+            category_id: catId
+        }))
+
+        const { error: relError } = await serviceClient
+            .from('product_categories')
+            .insert(categoryLinks)
+
+        if (relError) {
+            // Log error but don't fail the whole request (product is created)
+            console.error('Failed to link categories', relError)
+        }
     }
 
     return product

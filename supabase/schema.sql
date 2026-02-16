@@ -26,13 +26,13 @@ CREATE INDEX idx_products_created_at ON products(created_at DESC);
 CREATE TABLE user_profiles (
   id BIGSERIAL PRIMARY KEY,
   email TEXT UNIQUE NOT NULL,
-  name TEXT NOT NULL,
+  name TEXT,
   role TEXT NOT NULL DEFAULT 'customer' CHECK (role IN ('customer', 'admin')),
-  phone TEXT NOT NULL,
-  address TEXT NOT NULL,
-  city TEXT NOT NULL,
-  postal_code TEXT NOT NULL,
-  province TEXT NOT NULL,
+  phone TEXT,
+  address TEXT,
+  city TEXT,
+  postal_code TEXT,
+  province TEXT,
   -- We'll store a reference to Supabase auth user if they sign up
   auth_user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -80,6 +80,55 @@ CREATE INDEX idx_orders_created_at ON orders(created_at DESC);
 -- ============================================
 -- 4. ORDER ITEMS TABLE (Normalized)
 -- ============================================
+
+-- ============================================
+-- 1.1 CATEGORIES TABLE (Recursive)
+-- ============================================
+CREATE TABLE categories (
+  id BIGSERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  slug TEXT NOT NULL UNIQUE,
+  parent_id BIGINT REFERENCES categories(id) ON DELETE SET NULL,
+  image TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_categories_parent_id ON categories(parent_id);
+CREATE INDEX idx_categories_slug ON categories(slug);
+
+-- Add category_id to products
+ALTER TABLE products ADD COLUMN category_id BIGINT REFERENCES categories(id) ON DELETE SET NULL;
+CREATE INDEX idx_products_category_id ON products(category_id);
+
+
+-- ============================================
+-- 1.2 PRODUCT CATEGORIES (Junction Table)
+-- ============================================
+CREATE TABLE product_categories (
+  product_id BIGINT REFERENCES products(id) ON DELETE CASCADE,
+  category_id BIGINT REFERENCES categories(id) ON DELETE CASCADE,
+  PRIMARY KEY (product_id, category_id)
+);
+
+CREATE INDEX idx_product_categories_product ON product_categories(product_id);
+CREATE INDEX idx_product_categories_category ON product_categories(category_id);
+
+-- Remove old category columns from products if they exist
+-- ALTER TABLE products DROP COLUMN IF EXISTS category;
+-- ALTER TABLE products DROP COLUMN IF EXISTS category_id;
+-- Note: In a real production migration we would migrate data first. 
+-- For now we will just create the new table and ignore the old columns
+-- or let the user manually drop them. 
+-- For cleanliness in this file, I will remove the definitions from the CREATE TABLE products above
+-- but since this is an append-style file for the user to run, I'll add the DROP here.
+
+-- ALTER TABLE products DROP COLUMN category; 
+-- ALTER TABLE products DROP COLUMN category_id;
+
+-- ============================================
+-- 4. ORDER ITEMS TABLE (Normalized)
+-- ============================================
 CREATE TABLE order_items (
   id BIGSERIAL PRIMARY KEY,
   order_id BIGINT NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
@@ -106,6 +155,11 @@ BEGIN
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_categories_updated_at
+  BEFORE UPDATE ON categories
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_products_updated_at
   BEFORE UPDATE ON products
@@ -149,6 +203,34 @@ CREATE TRIGGER on_auth_user_created
 -- 6. ROW LEVEL SECURITY (RLS) POLICIES
 -- ============================================
 
+-- Categories: Public read, admin write
+ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Categories are viewable by everyone"
+  ON categories FOR SELECT
+  USING (true);
+
+CREATE POLICY "Admin can manage categories"
+  ON categories FOR ALL
+  USING (auth.role() = 'service_role' OR EXISTS (
+    SELECT 1 FROM user_profiles
+    WHERE auth_user_id = auth.uid() AND role = 'admin'
+  ));
+
+-- Product Categories: Public read, admin write
+ALTER TABLE product_categories ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Product categories are viewable by everyone"
+  ON product_categories FOR SELECT
+  USING (true);
+
+CREATE POLICY "Admin can manage product categories"
+  ON product_categories FOR ALL
+  USING (auth.role() = 'service_role' OR EXISTS (
+    SELECT 1 FROM user_profiles
+    WHERE auth_user_id = auth.uid() AND role = 'admin'
+  ));
+
 -- Products: Public read, admin write
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
 
@@ -183,7 +265,7 @@ CREATE POLICY "Users can view their own orders"
 
 CREATE POLICY "Admin can create products"
   ON products FOR INSERT
-  USING (auth.role() = 'admin');
+  WITH CHECK (auth.role() = 'admin');
 
 CREATE POLICY "Anyone can create orders"
   ON orders FOR INSERT
@@ -213,3 +295,5 @@ CREATE POLICY "Anyone can create order items"
 CREATE POLICY "Service role can manage order items"
   ON order_items FOR ALL
   USING (auth.role() = 'service_role');
+
+

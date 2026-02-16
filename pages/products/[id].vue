@@ -5,7 +5,12 @@
         <img :src="product.image" :alt="product.title" class="main-image" />
       </div>
       <div class="product-info">
-        <span class="category">{{ product.category }}</span>
+        <span class="category">
+          <span v-for="(cat, index) in product.categories" :key="cat.id">
+            {{ cat.name }}<span v-if="index < product.categories.length - 1">, </span>
+          </span>
+          <span v-if="!product.categories || product.categories.length === 0">{{ product.category }}</span>
+        </span>
         <h1 class="title">{{ product.title }}</h1>
         <p class="price">{{ formatPrice(product.price) }}</p>
         <p class="description">{{ product.description }}</p>

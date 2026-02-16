@@ -11,6 +11,9 @@
           <NuxtLink to="/account/orders" class="sidebar-link" exact-active-class="active">
             <span class="icon">📦</span> Pedidos
           </NuxtLink>
+          <span @click="logout" class="sidebar-link" exact-active-class="active">
+            <span class="icon">🚪</span> Cerrar Sesión
+          </span>
         </nav>
       </aside>
       
@@ -31,6 +34,12 @@ watchEffect(() => {
         router.push('/login')
     }
 })
+
+const logout = () => {
+    const { logout } = useAuth()
+    logout()
+    router.push('/login')
+}
 </script>
 
 <style scoped>
@@ -74,6 +83,7 @@ watchEffect(() => {
   color: var(--color-text-light);
   font-weight: 500;
   transition: all 0.2s;
+  cursor: pointer;
   text-decoration: none;
 }
 

@@ -7,6 +7,7 @@
       <nav class="admin-nav">
         <NuxtLink to="/admin" exact-active-class="active">Productos</NuxtLink>
         <NuxtLink to="/admin/orders" exact-active-class="active">Ordenes</NuxtLink>
+        <NuxtLink to="/admin/categories" exact-active-class="active">Categorías</NuxtLink>
         <NuxtLink to="/admin/create" exact-active-class="active">Agregar Producto</NuxtLink>
         <NuxtLink to="/" target="_blank">Ver Tienda</NuxtLink>
       </nav>
@@ -46,6 +47,7 @@ const pageTitle = computed(() => {
   if (route.path === '/admin/create') return 'Agregar Producto'
   if (route.path.includes('/admin/edit')) return 'Editar Producto'
   if (route.path === '/admin/orders') return 'Gestionar Ordenes'
+  if (route.path === '/admin/categories') return 'Gestionar Categorías'
   return 'Panel de Productos'
 })
 </script>
