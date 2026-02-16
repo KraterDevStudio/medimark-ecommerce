@@ -5,13 +5,14 @@
         <NuxtLink to="/admin">MediMark Admin</NuxtLink>
       </div>
       <nav class="admin-nav">
-        <NuxtLink to="/admin" exact-active-class="active">Dashboard</NuxtLink>
-        <NuxtLink to="/admin/create" exact-active-class="active">Add Product</NuxtLink>
-        <NuxtLink to="/" target="_blank">View Store</NuxtLink>
+        <NuxtLink to="/admin" exact-active-class="active">Productos</NuxtLink>
+        <NuxtLink to="/admin/orders" exact-active-class="active">Ordenes</NuxtLink>
+        <NuxtLink to="/admin/create" exact-active-class="active">Agregar Producto</NuxtLink>
+        <NuxtLink to="/" target="_blank">Ver Tienda</NuxtLink>
       </nav>
       <div class="user-panel">
-        <p>Logged in as <strong>{{ profile?.name || user?.email }}</strong></p>
-        <button @click="logout" class="btn-logout">Logout</button>
+        <p>Logueado como <strong>{{ profile?.name || user?.email }}</strong></p>
+        <button @click="logout" class="btn-logout">Cerrar Sesión</button>
       </div>
     </aside>
 
@@ -42,9 +43,10 @@ onMounted(() => {
 })
 
 const pageTitle = computed(() => {
-  if (route.path === '/admin/create') return 'Add New Product'
-  if (route.path.includes('/admin/edit')) return 'Edit Product'
-  return 'Product Dashboard'
+  if (route.path === '/admin/create') return 'Agregar Producto'
+  if (route.path.includes('/admin/edit')) return 'Editar Producto'
+  if (route.path === '/admin/orders') return 'Gestionar Ordenes'
+  return 'Panel de Productos'
 })
 </script>
 

@@ -1,5 +1,5 @@
 import { readBody, createError } from 'h3'
-import { serverSupabaseServiceRole } from '#supabase/server'
+import { serverSupabaseServiceRole, serverSupabaseUser } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
@@ -20,24 +20,48 @@ export default defineEventHandler(async (event) => {
     }
 
     const client = serverSupabaseServiceRole(event)
-    const token = getCookie(event, 'auth_token')
+    const user = await serverSupabaseUser(event)
 
     // Determine if user is logged in
     let userId = null
     let isGuest = true
 
-    if (token) {
-        if (token.startsWith('valid-user-')) {
-            const tokenUserId = Number(token.replace('valid-user-', ''))
-            // Find user profile by legacy ID (we'll need to map this)
-            const { data: userProfile } = await client
+    if (user) {
+        // Find user profile by Supabase UUID to get numeric ID
+        const { data: profile, error: profileError } = await client
+            .from('user_profiles')
+            .select('id')
+            .eq('auth_user_id', user.sub)
+            .maybeSingle()
+
+        console.log('User UUID:', user.sub);
+        if (profileError) {
+            console.error('Error fetching user profile:', profileError)
+        } else if (profile) {
+            userId = profile.id
+            isGuest = false
+        } else {
+            // Fallback: Create profile if it doesn't exist (DB trigger might have failed)
+            console.log('User profile missing, creating fallback profile for:', user.sub)
+            const { data: newProfile, error: createError } = await client
                 .from('user_profiles')
+                .insert({
+                    auth_user_id: user.sub,
+                    email: user.email,
+                    name: user.user_metadata?.name || user.email?.split('@')[0] || 'Customer',
+                    phone: phone || '', // Use phone from order as fallback
+                    address: address || '',
+                    city: city || '',
+                    postal_code: postalCode || '',
+                    province: province || ''
+                })
                 .select('id')
-                .eq('id', tokenUserId)
                 .single()
 
-            if (userProfile) {
-                userId = userProfile.id
+            if (createError) {
+                console.error('Failed to create fallback profile:', createError)
+            } else if (newProfile) {
+                userId = newProfile.id
                 isGuest = false
             }
         }
@@ -58,7 +82,7 @@ export default defineEventHandler(async (event) => {
             customer_province: province,
             total: body.total,
             payment_method: body.paymentMethod || 'transferencia',
-            status: 'Pending'
+            status: 'Pendiente'
         })
         .select()
         .single()

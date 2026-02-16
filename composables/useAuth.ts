@@ -1,5 +1,6 @@
 export const useAuth = () => {
     const supabase = useSupabaseClient()
+    const { clearCart } = useCart()
     const user = useSupabaseUser()
     const router = useRouter()
 
@@ -11,7 +12,6 @@ export const useAuth = () => {
         if (!userId) return null
 
         loadingProfile.value = true;
-        console.log("Fetching profile for user", userId)
         try {
             const { data, error } = await supabase
                 .from('user_profiles')
@@ -21,7 +21,6 @@ export const useAuth = () => {
 
             if (!error && data) {
                 profile.value = data
-                console.log("Profile fetched:", data);
                 return data
             }
         } catch (e) {
@@ -76,6 +75,21 @@ export const useAuth = () => {
 
         // Profiles are usually created via database triggers in Supabase
         // but if not, we can manually create it here or let the watch handle it
+        if (!error && (await supabase.auth.getUser()).data.user) {
+            const user = (await supabase.auth.getUser()).data.user
+            if (user) {
+                await supabase.from('user_profiles').insert({
+                    auth_user_id: user.id,
+                    email: data.email,
+                    name: data.name,
+                    phone: '',
+                    address: '',
+                    city: '',
+                    postal_code: '',
+                    province: ''
+                } as any)
+            }
+        }
 
         return true
     }
@@ -84,6 +98,7 @@ export const useAuth = () => {
         const { error } = await supabase.auth.signOut()
         if (error) console.error('Logout failed', error)
         profile.value = null
+        clearCart()
         router.push('/login')
     }
 

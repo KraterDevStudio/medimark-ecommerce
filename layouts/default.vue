@@ -12,9 +12,9 @@
             </NuxtLink></li>
             <li v-if="user">
               <NuxtLink v-if="isAdmin" to="/admin">Admin</NuxtLink>
-              <NuxtLink v-else to="/account/orders">Pedidos</NuxtLink>
+              <NuxtLink v-else to="/account/orders">Cuenta</NuxtLink>
             </li>
-            <li v-if="!user"><NuxtLink to="/login">Cuenta</NuxtLink></li>
+            <li v-if="!user"><NuxtLink to="/login">Iniciar sesión</NuxtLink></li>
             <li v-else><button @click="logout" class="btn-text">Cerrar Sesión</button></li>
           </ul>
         </nav>

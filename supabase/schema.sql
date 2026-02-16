@@ -28,6 +28,11 @@ CREATE TABLE user_profiles (
   email TEXT UNIQUE NOT NULL,
   name TEXT NOT NULL,
   role TEXT NOT NULL DEFAULT 'customer' CHECK (role IN ('customer', 'admin')),
+  phone TEXT NOT NULL,
+  address TEXT NOT NULL,
+  city TEXT NOT NULL,
+  postal_code TEXT NOT NULL,
+  province TEXT NOT NULL,
   -- We'll store a reference to Supabase auth user if they sign up
   auth_user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -57,7 +62,7 @@ CREATE TABLE orders (
   -- Order details
   total NUMERIC(10, 2) NOT NULL CHECK (total >= 0),
   payment_method TEXT NOT NULL DEFAULT 'transferencia',
-  status TEXT NOT NULL DEFAULT 'Pending' CHECK (status IN ('Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled')),
+  status TEXT NOT NULL DEFAULT 'Pendiente' CHECK (status IN ('Pendiente', 'Paga', 'Completada', 'Cancelada')),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   -- Constraint: must have either user_id OR guest_email

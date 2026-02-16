@@ -1,27 +1,32 @@
 import { createError } from 'h3'
-import { serverSupabaseServiceRole } from '#supabase/server'
+import { serverSupabaseServiceRole, serverSupabaseUser, serverSupabaseClient } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
-    const token = getCookie(event, 'auth_token')
+    const user = await serverSupabaseUser(event)
 
-    if (!token) {
+    if (!user) {
         throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
     }
-
     const client = serverSupabaseServiceRole(event)
-    let userId = null
 
-    if (token.startsWith('valid-user-')) {
-        userId = Number(token.replace('valid-user-', ''))
-    } else if (token === 'valid-admin-token') {
-        // Admin shouldn't have orders
+    // Fetch numeric userId from user_profiles table using auth_user_id (UUID)
+    const { data: profile, error: profileError } = await client
+        .from('user_profiles')
+        .select('*')
+        .eq('auth_user_id', user.sub)
+        .maybeSingle()
+
+    if (profileError || !profile) {
+        // If user is authenticated but has no profile, they won't have orders
         return []
-    } else {
-        throw createError({ statusCode: 401, statusMessage: 'Invalid token' })
     }
 
+    const userId = profile.id
+    const isAdmin = profile.role === 'admin';
+
+
     // Fetch orders with their items
-    const { data: orders, error } = await client
+    const { data: orders, error } = !isAdmin ? await client
         .from('orders')
         .select(`
       *,
@@ -37,6 +42,22 @@ export default defineEventHandler(async (event) => {
     `)
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
+        : await client
+            .from('orders')
+            .select(`
+      *,
+      order_items (
+        id,
+        product_id,
+        product_title,
+        product_price,
+        product_image,
+        quantity,
+        subtotal
+      )
+    `)
+            .order('created_at', { ascending: false })
+
 
     if (error) {
         throw createError({
@@ -73,5 +94,6 @@ export default defineEventHandler(async (event) => {
         status: order.status
     }))
 
+    console.log(transformedOrders)
     return transformedOrders
 })

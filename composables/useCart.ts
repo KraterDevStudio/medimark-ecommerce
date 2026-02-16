@@ -15,7 +15,7 @@ export const useCart = () => {
     const items = useState<CartItem[]>('cart-items', () => [])
 
     const addToCart = (product: Product) => {
-        const existing = items.value.find(i => i.id === product.id)
+        const existing = items.value.find((i: CartItem) => i.id === product.id)
         if (existing) {
             existing.quantity++
         } else {
@@ -25,7 +25,7 @@ export const useCart = () => {
     }
 
     const removeFromCart = (id: number) => {
-        items.value = items.value.filter(i => i.id !== id)
+        items.value = items.value.filter((i: CartItem) => i.id !== id)
         storeCart()
     }
 
@@ -35,7 +35,7 @@ export const useCart = () => {
     }
 
     const updateQuantity = (id: number, quantity: number) => {
-        const item = items.value.find(i => i.id === id)
+        const item = items.value.find((i: CartItem) => i.id === id)
         if (item) {
             if (quantity <= 0) {
                 removeFromCart(id)
@@ -52,17 +52,15 @@ export const useCart = () => {
     }
 
     const total = computed(() => {
-        console.log('Calculating total for items:', items.value)
-        return items.value.reduce((sum, item) => {
+        return items.value.reduce((sum: number, item: CartItem) => {
             const price = Number(item.price)
             const qty = Number(item.quantity)
-            console.log(`Item ${item.id}: price=${item.price} (${price}), qty=${item.quantity} (${qty})`)
             return sum + (price * qty)
         }, 0)
     })
 
     const cartCount = computed(() => {
-        return items.value.reduce((sum, item) => sum + Number(item.quantity), 0)
+        return items.value.reduce((sum: number, item: CartItem) => sum + Number(item.quantity), 0)
     })
 
     // Formatting utility inside composable for reuse
@@ -74,11 +72,14 @@ export const useCart = () => {
     const loadCart = () => {
         if (process.server) return
         const cookies = localStorage.getItem('cart')
-        console.log(cookies)
         if (cookies) {
             items.value = JSON.parse(cookies)
         }
     }
 
-    return { items, addToCart, removeFromCart, updateQuantity, clearCart, total, cartCount, formatPrice, loadCart }
+    const getItemQuantity = (id: number) => {
+        return items.value.find((i: CartItem) => i.id === id)?.quantity || 0
+    }
+
+    return { items, addToCart, removeFromCart, updateQuantity, clearCart, total, cartCount, formatPrice, loadCart, getItemQuantity }
 }
