@@ -53,22 +53,25 @@ const form = reactive({
 })
 const loading = ref(false)
 const error = ref('')
-const { register } = useAuth()
+const { register, user } = useAuth()
 const router = useRouter()
+
+watchEffect(() => {
+  if (user.value) {
+    router.push('/')
+  }
+})
 
 const handleRegister = async () => {
   loading.value = true
   error.value = ''
   
   try {
-    const success = await register(form)
-    if (success) {
-      router.push('/')
-    } else {
-      error.value = 'Registration failed'
-    }
+    await register(form)
+    // Auth state change will trigger the watchEffect above
   } catch(e: any) {
-    error.value = e.statusMessage || 'Registration failed'
+    console.log(e)
+    error.value = e.message || 'Registration failed'
   }
   
   loading.value = false

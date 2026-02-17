@@ -1,19 +1,19 @@
 <template>
-  <div class="container orders-page">
-    <h1>Your Order History</h1>
+  <div>
+    <h2 class="section-title">Historial de Pedidos</h2>
 
-    <div v-if="loading" class="loading">Loading orders...</div>
+    <div v-if="loading" class="loading">Cargando pedidos...</div>
     
     <div v-else-if="!orders || orders.length === 0" class="empty-state">
-      <p>You haven't placed any orders yet.</p>
-      <NuxtLink to="/" class="btn">Start Shopping</NuxtLink>
+      <p>Aún no has realizado ningún pedido.</p>
+      <NuxtLink to="/" class="btn">Empezar a comprar</NuxtLink>
     </div>
 
     <div v-else class="orders-list">
       <div v-for="order in orders" :key="order.id" class="order-card">
         <div class="order-header">
           <div class="order-meta">
-            <span class="order-id">Order #{{ order.id }}</span>
+            <span class="order-id">Pedido #{{ order.id }}</span>
             <span class="order-date">{{ formatDate(order.date) }}</span>
           </div>
           <div class="order-status badge">{{ order.status }}</div>
@@ -27,7 +27,7 @@
         </div>
 
         <div class="order-footer">
-          <span class="total-label">Total Amount</span>
+          <span class="total-label">Subtotal</span>
           <span class="total-value">{{ formatPrice(order.total) }}</span>
         </div>
       </div>
@@ -41,7 +41,7 @@ const { formatPrice } = useCart()
 const { data: orders, pending: loading } = await useFetch('/api/orders')
 
 const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('en-US', {
+  return new Date(dateString).toLocaleDateString('es-ES', {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
@@ -50,13 +50,10 @@ const formatDate = (dateString: string) => {
 </script>
 
 <style scoped>
-.orders-page {
-  padding: 2rem 0;
-  max-width: 800px;
-}
-
-h1 {
+.section-title {
   margin-bottom: 2rem;
+  font-size: 1.5rem;
+  color: var(--color-text);
 }
 
 .loading, .empty-state {
