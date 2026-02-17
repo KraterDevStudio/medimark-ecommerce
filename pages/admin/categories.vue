@@ -7,15 +7,11 @@
     <div class="categories-list">
       <div v-if="loading" class="loading">Loading categories...</div>
       <div v-else-if="!categories || categories.length === 0" class="empty-state">No categories found.</div>
-      
+
       <div v-else class="category-tree">
         <div v-for="category in categories" :key="category.id" class="category-item-wrapper">
-          <CategoryItem 
-            :category="category" 
-            @edit="openEditModal" 
-            @delete="deleteCategory" 
-            @add-sub="openCreateModal"
-          />
+          <CategoryItem :category="category" @edit="openEditModal" @delete="deleteCategory"
+            @add-sub="openCreateModal" />
         </div>
       </div>
     </div>
@@ -133,7 +129,7 @@ const saveCategory = async () => {
   try {
     const endpoint = isEditing.value ? '/api/categories' : '/api/categories'
     const method = isEditing.value ? 'PUT' : 'POST'
-    
+
     await $fetch(endpoint, {
       method,
       body: form
@@ -172,29 +168,29 @@ const CategoryItem = defineComponent({
       h('div', { class: 'category-row' }, [
         h('span', { class: 'category-name' }, props.category.name),
         h('div', { class: 'category-actions' }, [
-          h('button', { 
+          h('button', {
             class: 'btn-xs btn-add',
-            onClick: () => emit('add-sub', props.category.id) 
+            onClick: () => emit('add-sub', props.category.id)
           }, '+ Sub'),
-          h('button', { 
+          h('button', {
             class: 'btn-xs btn-edit',
-            onClick: () => emit('edit', props.category) 
+            onClick: () => emit('edit', props.category)
           }, 'Edit'),
-          h('button', { 
+          h('button', {
             class: 'btn-xs btn-delete',
-            onClick: () => emit('delete', props.category.id) 
+            onClick: () => emit('delete', props.category.id)
           }, 'Delete')
         ])
       ]),
-      props.category.children && props.category.children.length > 0 
-        ? h('div', { class: 'category-children' }, 
-            props.category.children.map((child: any) => h(CategoryItem, { 
-              category: child,
-              onEdit: (c: any) => emit('edit', c),
-              onDelete: (id: number) => emit('delete', id),
-              onAddSub: (id: number) => emit('add-sub', id)
-            }))
-          )
+      props.category.children && props.category.children.length > 0
+        ? h('div', { class: 'category-children' },
+          props.category.children.map((child: any) => h(CategoryItem, {
+            category: child,
+            onEdit: (c: any) => emit('edit', c),
+            onDelete: (id: number) => emit('delete', id),
+            onAddSub: (id: number) => emit('add-sub', id)
+          }))
+        )
         : null
     ])
   }
@@ -303,7 +299,10 @@ const CategoryItem = defineComponent({
 /* Modal Styles */
 .modal-overlay {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;

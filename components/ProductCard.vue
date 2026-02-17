@@ -15,13 +15,13 @@
       </p>
       <div class="footer">
         <span class="price">{{ formatPrice(product.price) }}</span>
-        
+
         <div v-if="quantity > 0" class="quantity-selector">
           <button class="btn-qty" @click="updateQuantity(product.id, quantity - 1)">-</button>
           <span class="quantity-value">{{ quantity }}</span>
           <button class="btn-qty" @click="updateQuantity(product.id, quantity + 1)">+</button>
         </div>
-        <button v-else class="btn btn-sm" @click="addToCart(product)">Add to Cart</button>
+        <button v-else class="btn btn-sm" @click="addToCart(product)">Agregar al carrito</button>
       </div>
     </div>
   </div>

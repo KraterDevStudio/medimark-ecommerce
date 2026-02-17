@@ -26,5 +26,12 @@ export default defineEventHandler(async (event) => {
         })
     }
 
+    // Invalidate cache
+    const storage = useStorage('cache')
+    const productKeys = await storage.getKeys('api:products')
+    for (const key of productKeys) {
+        await storage.removeItem(key)
+    }
+
     return { success: true, message: 'Product deleted successfully' }
 })

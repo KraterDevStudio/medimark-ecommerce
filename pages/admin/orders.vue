@@ -1,5 +1,8 @@
 <template>
   <div class="admin-orders">
+    <div class="actions-bar">
+      <button @click="openCreateModal()" class="btn">Agregar Orden</button>
+    </div>
     <div class="table-container">
       <table class="orders-table">
         <thead>
@@ -13,12 +16,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr 
-            v-for="order in orders" 
-            :key="order.id" 
-            @click="openOrder(order)"
-            class="order-row"
-          >
+          <tr v-for="order in orders" :key="order.id" @click="openOrder(order)" class="order-row">
             <td>#{{ order.id }}</td>
             <td>
               <div class="customer-info">
@@ -30,12 +28,9 @@
             <td>{{ formatPrice(order.total) }}</td>
             <td>
               <div @click.stop>
-                <select 
-                  :value="order.status" 
-                  @change="(e) => updateStatus(order.id, (e.target as HTMLSelectElement).value)"
-                  class="status-select"
-                  :class="getStatusClass(order.status)"
-                >
+                <select :value="order.status"
+                  @change="(e) => updateStatus(order.id, (e.target as HTMLSelectElement).value)" class="status-select"
+                  :class="getStatusClass(order.status)">
                   <option value="Pendiente">Pendiente</option>
                   <option value="Paga">Paga</option>
                   <option value="Completada">Completada</option>
@@ -63,12 +58,9 @@
         <div class="modal-body">
           <div class="section">
             <h3>Estado</h3>
-            <select 
-              :value="selectedOrder.status" 
+            <select :value="selectedOrder.status"
               @change="(e) => updateStatus(selectedOrder!.id, (e.target as HTMLSelectElement).value)"
-              class="status-select large"
-              :class="getStatusClass(selectedOrder.status)"
-            >
+              class="status-select large" :class="getStatusClass(selectedOrder.status)">
               <option value="Pendiente">Pendiente</option>
               <option value="Paga">Paga</option>
               <option value="Completada">Completada</option>
@@ -82,19 +74,16 @@
               <p><strong>Nombre:</strong> {{ selectedOrder.customerInfo.name }}</p>
               <p><strong>Email:</strong> {{ selectedOrder.customerInfo.email }}</p>
               <p><strong>Teléfono:</strong> {{ selectedOrder.customerInfo.phone }}</p>
-              <p><strong>Dirección:</strong> {{ selectedOrder.customerInfo.address }}, {{ selectedOrder.customerInfo.city }}, {{ selectedOrder.customerInfo.province }}</p>
+              <p><strong>Dirección:</strong> {{ selectedOrder.customerInfo.address }}, {{
+                selectedOrder.customerInfo.city }}, {{ selectedOrder.customerInfo.province }}</p>
             </div>
           </div>
 
           <div class="section">
             <h3>Productos</h3>
             <div class="products-list">
-              <NuxtLink 
-                v-for="item in selectedOrder.items" 
-                :key="item.id" 
-                :to="`/products/${item.id}`"
-                class="product-item"
-              >
+              <NuxtLink v-for="item in selectedOrder.items" :key="item.id" :to="`/products/${item.id}`"
+                class="product-item">
                 <img :src="item.image" :alt="item.title" class="product-thumb" />
                 <div class="product-info">
                   <span class="product-title">{{ item.title }}</span>
@@ -118,6 +107,106 @@
         </div>
       </div>
     </div>
+
+    <!-- Order Creation Modal -->
+    <div v-if="showCreateModal" class="modal-overlay" @click="closeCreateModal">
+      <div class="modal-content" @click.stop>
+        <header class="modal-header">
+          <h2>Nueva Orden (Modo Invitado)</h2>
+          <button class="close-btn" @click="closeCreateModal">&times;</button>
+        </header>
+
+        <div class="modal-body">
+          <form @submit.prevent="submitOrder" class="order-form">
+            <div class="section">
+              <h3>Información del Cliente</h3>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Nombre</label>
+                  <input v-model="orderForm.customerInfo.name" type="text" required />
+                </div>
+                <div class="form-group">
+                  <label>Email</label>
+                  <input v-model="orderForm.customerInfo.email" type="email" required />
+                </div>
+                <div class="form-group">
+                  <label>Teléfono</label>
+                  <input v-model="orderForm.customerInfo.phone" type="tel" required />
+                </div>
+                <div class="form-group">
+                  <label>Provincia</label>
+                  <input v-model="orderForm.customerInfo.province" type="text" required />
+                </div>
+                <div class="form-group full-width">
+                  <label>Dirección</label>
+                  <input v-model="orderForm.customerInfo.address" type="text" required />
+                </div>
+                <div class="form-group">
+                  <label>Ciudad</label>
+                  <input v-model="orderForm.customerInfo.city" type="text" required />
+                </div>
+                <div class="form-group">
+                  <label>Código Postal</label>
+                  <input v-model="orderForm.customerInfo.postalCode" type="text" required />
+                </div>
+              </div>
+            </div>
+
+            <div class="section">
+              <h3>Productos</h3>
+              <div class="add-product-row">
+                <select v-model="selectedProductId" class="form-select">
+                  <option value="">Seleccionar producto...</option>
+                  <option v-for="p in allProducts" :key="p.id" :value="p.id">
+                    {{ p.title }} - {{ formatPrice(p.price) }}
+                  </option>
+                </select>
+                <input v-model.number="selectedProductQuantity" type="number" min="1" class="qty-input" />
+                <button type="button" class="btn btn-sm" @click="addProduct">Añadir</button>
+              </div>
+
+              <div v-if="orderForm.items.length > 0" class="selected-items">
+                <div v-for="item in orderForm.items" :key="item.id" class="selected-item">
+                  <img :src="item.image" :alt="item.title" class="item-thumb" />
+                  <div class="item-info">
+                    <span class="item-title">{{ item.title }}</span>
+                    <span class="item-meta">{{ item.quantity }} x {{ formatPrice(item.price) }}</span>
+                  </div>
+                  <div class="item-actions">
+                    <span class="item-total">{{ formatPrice(item.price * item.quantity) }}</span>
+                    <button type="button" class="btn-remove" @click="removeProduct(item.id)">&times;</button>
+                  </div>
+                </div>
+              </div>
+              <p v-else class="empty-items">No hay productos añadidos</p>
+            </div>
+
+            <div class="section">
+              <h3>Pago</h3>
+              <select v-model="orderForm.paymentMethod" class="form-select">
+                <option value="transferencia">Transferencia Bancaria</option>
+                <option value="efectivo">Efectivo</option>
+                <option value="tarjeta">Tarjeta</option>
+              </select>
+            </div>
+
+            <div class="order-summary-footer">
+              <div class="summary-row total">
+                <span>Total:</span>
+                <span>{{ formatPrice(orderForm.total) }}</span>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" @click="closeCreateModal">Cancelar</button>
+              <button type="submit" class="btn" :disabled="submitting || orderForm.items.length === 0">
+                {{ submitting ? 'Creando...' : 'Crear Orden' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -129,9 +218,64 @@ definePageMeta({
   middleware: 'admin'
 })
 
-const { data: orders, refresh } = await useFetch('/api/orders')
+interface Order {
+  id: number
+  date: string
+  total: number
+  status: string
+  paymentMethod: string
+  customerInfo: {
+    name: string
+    email: string
+    phone: string
+    address: string
+    city: string
+    province: string
+    postalCode: string
+  }
+  items: Array<{
+    id: number
+    title: string
+    price: number
+    image: string
+    quantity: number
+  }>
+}
+
+interface Product {
+  id: number
+  title: string
+  price: number
+  image: string
+  description?: string
+  categories?: any[]
+}
+
+const { data: orders, refresh } = await useFetch<Order[]>('/api/orders')
+const { data: allProducts } = await useFetch<Product[]>('/api/products')
 const { formatPrice } = useCart()
-const selectedOrder = ref<any>(null)
+const selectedOrder = ref<Order | null>(null)
+
+// Order Creation State
+const showCreateModal = ref(false)
+const submitting = ref(false)
+const orderForm = reactive({
+  customerInfo: {
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    postalCode: '',
+    province: ''
+  },
+  items: [] as any[],
+  paymentMethod: 'transferencia',
+  total: 0
+})
+
+const selectedProductId = ref('')
+const selectedProductQuantity = ref(1)
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('es-ES', {
@@ -141,6 +285,82 @@ const formatDate = (dateString: string) => {
     hour: '2-digit',
     minute: '2-digit'
   })
+}
+
+const openCreateModal = () => {
+  orderForm.customerInfo = {
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    postalCode: '',
+    province: ''
+  }
+  orderForm.items = []
+  orderForm.paymentMethod = 'transferencia'
+  orderForm.total = 0
+  showCreateModal.value = true
+}
+
+const closeCreateModal = () => {
+  showCreateModal.value = false
+}
+
+const addProduct = () => {
+  if (!selectedProductId.value) return
+
+  const product = allProducts.value?.find((p: any) => p.id === parseInt(selectedProductId.value))
+  if (!product) return
+
+  const existingItem = orderForm.items.find((item: any) => item.id === product.id)
+  if (existingItem) {
+    existingItem.quantity += selectedProductQuantity.value
+  } else {
+    orderForm.items.push({
+      id: product.id,
+      title: product.title,
+      price: product.price,
+      image: product.image,
+      quantity: selectedProductQuantity.value
+    })
+  }
+
+  calculateTotal()
+  selectedProductId.value = ''
+  selectedProductQuantity.value = 1
+}
+
+const removeProduct = (id: number) => {
+  orderForm.items = orderForm.items.filter(item => item.id !== id)
+  calculateTotal()
+}
+
+const calculateTotal = () => {
+  orderForm.total = orderForm.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+}
+
+const submitOrder = async () => {
+  if (orderForm.items.length === 0) {
+    alert('Please add at least one product')
+    return
+  }
+
+  submitting.value = true
+  try {
+    await $fetch('/api/orders', {
+      method: 'POST',
+      body: orderForm
+    })
+
+    await refresh()
+    closeCreateModal()
+  } catch (e: any) {
+    alert(e.statusMessage || 'Failed to create order')
+    console.error(e)
+  } finally {
+    submitting.value = false
+  }
 }
 
 const openOrder = (order: any) => {
@@ -160,7 +380,7 @@ const updateStatus = async (id: number, newStatus: string) => {
         status: newStatus
       }
     })
-    
+
     // Update local state if modal is open
     if (selectedOrder.value && selectedOrder.value.id === id) {
       selectedOrder.value.status = newStatus
@@ -199,7 +419,8 @@ const getStatusClass = (status: string) => {
   text-align: left;
 }
 
-.orders-table th, .orders-table td {
+.orders-table th,
+.orders-table td {
   padding: 1rem;
   border-bottom: 1px solid var(--color-border);
 }
@@ -424,5 +645,156 @@ const getStatusClass = (status: string) => {
   color: #111827;
   font-size: 1.25rem;
   margin-top: 1rem;
+}
+
+/* Form Styles */
+.actions-bar {
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.order-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.form-group.full-width {
+  grid-column: span 2;
+}
+
+.form-group label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.form-group input,
+.form-select {
+  padding: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+}
+
+.form-select {
+  width: 100%;
+}
+
+.add-product-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.qty-input {
+  width: 60px;
+  padding: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.375rem;
+}
+
+.selected-items {
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.selected-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.selected-item:last-child {
+  border-bottom: none;
+}
+
+.item-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 0.25rem;
+}
+
+.item-info {
+  flex: 1;
+}
+
+.item-title {
+  display: block;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.item-meta {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.item-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.item-total {
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.btn-remove {
+  background: none;
+  border: none;
+  color: #ef4444;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0 0.25rem;
+}
+
+.empty-items {
+  text-align: center;
+  color: #6b7280;
+  font-style: italic;
+  padding: 1rem;
+  border: 1px dashed var(--color-border);
+  border-radius: 0.5rem;
+}
+
+.order-summary-footer {
+  border-top: 1px solid var(--color-border);
+  padding-top: 1rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.btn-secondary {
+  background-color: white;
+  color: #374151;
+  border: 1px solid var(--color-border);
+}
+
+.btn-secondary:hover {
+  background-color: #f9fafb;
 }
 </style>

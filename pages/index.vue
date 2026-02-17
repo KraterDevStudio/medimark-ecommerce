@@ -1,6 +1,13 @@
 <template>
   <div>
-    <section class="hero">
+    <!-- Make hero section be a carrousel of images with arrows to navigate and dots to show current slide-->
+    <div class="hero-carousel">
+      <div class="hero-slide" v-for="(image, index) in heroImages" :key="index">
+        <img :src="image" alt="Hero">
+      </div>
+    </div>
+
+    <!-- <section class="hero">
       <div class="container">
         <h1>Bienvenido a MediMark</h1>
         <p>Descubre nuestra colección curada de productos premium.</p>
@@ -8,12 +15,12 @@
            <button class="btn btn-outline" @click="scrollToProducts">Comprar Ahora</button>
         </div>
       </div>
-    </section>
+    </section> -->
 
     <section id="products" class="container products-section">
       <div class="section-header">
-         <h2 class="section-title">Últimos Productos</h2>
-         <p class="section-subtitle">Descubre lo nuevo</p>
+        <h2 class="section-title">Últimos Productos</h2>
+        <p class="section-subtitle">Descubre lo nuevo</p>
       </div>
 
       <div v-if="status === 'pending'" class="loading">
@@ -23,11 +30,7 @@
         Error al cargar productos.
       </div>
       <div v-else class="grid grid-cols-3 product-grid">
-        <ProductCard 
-          v-for="product in products" 
-          :key="product.id" 
-          :product="product" 
-        />
+        <ProductCard v-for="product in products" :key="product.id" :product="product" />
       </div>
     </section>
   </div>
@@ -99,8 +102,8 @@ const scrollToProducts = () => {
 }
 
 .error {
-    text-align: center;
-    color: red;
-    padding: 2rem;
+  text-align: center;
+  color: red;
+  padding: 2rem;
 }
 </style>

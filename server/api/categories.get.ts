@@ -1,6 +1,13 @@
 import { serverSupabaseClient } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
+    const storage = useStorage('cache')
+    const cacheKey = 'api:categories'
+
+    // Try to get from cache
+    const cached = await storage.getItem(cacheKey)
+    if (cached) return cached
+
     const client = await serverSupabaseClient(event)
 
     const { data: categories, error } = await client
@@ -37,6 +44,9 @@ export default defineEventHandler(async (event) => {
             roots.push(categoryMap.get(cat.id))
         }
     })
+
+    // Store in cache
+    await storage.setItem(cacheKey, roots)
 
     return roots
 })

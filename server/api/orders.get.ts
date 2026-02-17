@@ -94,6 +94,5 @@ export default defineEventHandler(async (event) => {
         status: order.status
     }))
 
-    console.log(transformedOrders)
     return transformedOrders
 })
