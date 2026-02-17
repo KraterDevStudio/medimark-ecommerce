@@ -1,20 +1,20 @@
 <template>
   <div class="container login-page">
     <div class="login-card">
-      <h1>Admin Login</h1>
+      <h1>Iniciar sesión</h1>
       <form @submit.prevent="handleLogin">
         <div class="form-group">
-          <label for="email">Email Address</label>
+          <label for="email">Correo electrónico</label>
           <input 
             type="text" 
             id="email" 
             v-model="email" 
-            placeholder="admin or user@example.com"
+            placeholder="Correo electrónico"
             required 
           />
         </div>
         <div class="form-group">
-          <label for="password">Password</label>
+          <label for="password">Contraseña</label>
           <input 
             type="password" 
             id="password" 
@@ -25,10 +25,10 @@
         </div>
         <p v-if="error" class="error-msg">{{ error }}</p>
         <button type="submit" class="btn btn-block" :disabled="loading">
-          {{ loading ? 'Logging in...' : 'Login' }}
+          {{ loading ? 'Iniciando sesión...' : 'Iniciar sesión' }}
         </button>
         <p class="register-link">
-          Don't have an account? <NuxtLink to="/register">Register here</NuxtLink>
+          No tenes cuenta? <NuxtLink to="/register">Registrate</NuxtLink>
         </p>
       </form>
     </div>
@@ -111,14 +111,13 @@ const email = ref('')
 const password = ref('')
 const loading = ref(false)
 const error = ref('')
-const { login } = useAuth()
+const { login, user } = useAuth()
+// const user = useSupabaseUser()
 const router = useRouter()
-const route = useRoute()
 
-// Check for redirect message
-onMounted(() => {
-  if (route.query.user) {
-    // maybe show a message?
+watchEffect(() => {
+  if (user.value) {
+    router.push('/')
   }
 })
 
@@ -126,15 +125,16 @@ const handleLogin = async () => {
   loading.value = true
   error.value = ''
   
-  const success = await login({ email: email.value, password: password.value })
-  
-  if (success) {
-    router.push('/')
-  } else {
-    error.value = 'Invalid credentials'
+  try {
+      const success = await login({ email: email.value, password: password.value })
+      if (!success) {
+          error.value = 'Invalid login credentials'
+      }
+  } catch(e) {
+      error.value = 'An error occurred'
+  } finally {
+      loading.value = false
   }
-  
-  loading.value = false
 }
 </script>
 

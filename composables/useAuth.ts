@@ -1,64 +1,108 @@
 export const useAuth = () => {
-    const user = useState('user', () => null)
+    const supabase = useSupabaseClient()
+    const { clearCart } = useCart()
+    const user = useSupabaseUser()
     const router = useRouter()
 
-    const login = async (data: any) => {
-        try {
-            const response = await $fetch('/api/auth', {
-                method: 'POST',
-                body: data // password or email/password
-            })
+    // State for user profile (role, etc.)
+    const profile = useState<any>('user_profile', () => null)
+    const loadingProfile = useState<boolean>('loading_profile', () => false)
 
-            if (response.user) {
-                user.value = response.user
-                return true
+    const fetchProfile = async (userId: string) => {
+        if (!userId) return null
+
+        loadingProfile.value = true;
+        try {
+            const { data, error } = await supabase
+                .from('user_profiles')
+                .select('*')
+                .eq('auth_user_id', userId)
+                .maybeSingle()
+
+            if (!error && data) {
+                profile.value = data
+                return data
             }
-            return false
         } catch (e) {
-            console.error('Login failed', e)
+            console.error('Error fetching profile:', e)
+        } finally {
+            loadingProfile.value = false
+        }
+        return null
+    }
+
+    // Watch user changes
+    watch(user, async (newUser) => {
+        if (newUser && newUser.sub) {
+            if (!profile.value || profile.value.auth_user_id !== newUser.sub) {
+                await fetchProfile(newUser.sub)
+            }
+        } else {
+            profile.value = null
+        }
+    }, { immediate: true })
+
+    const login = async (data: any) => {
+        const { error } = await supabase.auth.signInWithPassword({
+            email: data.email,
+            password: data.password
+        })
+
+        if (error) {
+            console.error('Login failed', error)
             return false
         }
+
+        // The watch will handle profile fetching
+        return true
     }
 
     const register = async (data: any) => {
-        try {
-            const response = await $fetch('/api/auth/register', {
-                method: 'POST',
-                body: data
-            })
-
-            if (response.user) {
-                user.value = response.user
-                return true
+        const { error } = await supabase.auth.signUp({
+            email: data.email,
+            password: data.password,
+            options: {
+                data: {
+                    name: data.name
+                }
             }
-            return false
-        } catch (e) {
-            console.error('Registration failed', e)
-            throw e
+        })
+
+        if (error) {
+            console.error('Registration failed', error)
+            throw error
         }
+
+        // Profiles are usually created via database triggers in Supabase
+        // but if not, we can manually create it here or let the watch handle it
+        if (!error && (await supabase.auth.getUser()).data.user) {
+            const user = (await supabase.auth.getUser()).data.user
+            if (user) {
+                await supabase.from('user_profiles').insert({
+                    auth_user_id: user.id,
+                    email: data.email,
+                    name: data.name,
+                    phone: '',
+                    address: '',
+                    city: '',
+                    postal_code: '',
+                    province: ''
+                } as any)
+            }
+        }
+
+        return true
     }
 
-    const logout = () => {
-        user.value = null
-        const token = useCookie('auth_token')
-        token.value = null
+    const logout = async () => {
+        const { error } = await supabase.auth.signOut()
+        if (error) console.error('Logout failed', error)
+        profile.value = null
+        clearCart()
         router.push('/login')
     }
 
-    // Check auth status on init
-    const initAuth = () => {
-        // In a real app, we would verify the token with the server here
-        // For this demo, we'll simple check cookie existence and maybe decode if it was JWT
-        const token = useCookie('auth_token')
-        if (token.value) {
-            // Mock restoring session - realistically we'd hit a /me endpoint
-            if (token.value === 'valid-admin-token') {
-                user.value = { username: 'Administrator', role: 'admin' }
-            } else if (token.value.startsWith('valid-user-')) {
-                user.value = { role: 'customer' } // Minimal state restore
-            }
-        }
-    }
+    const isAdmin = computed(() => profile.value?.role === 'admin')
 
-    return { user, login, register, logout, initAuth }
+    return { user, profile, isAdmin, loadingProfile, fetchProfile, login, register, logout }
 }

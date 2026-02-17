@@ -1,8 +1,5 @@
 import { readBody, createError } from 'h3'
-import fs from 'fs'
-import path from 'path'
-
-const productsPath = path.resolve(process.cwd(), 'server/data/products.json')
+import { serverSupabaseServiceRole } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
@@ -14,18 +11,27 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    let products = JSON.parse(fs.readFileSync(productsPath, 'utf-8'))
-    const initialLength = products.length
-    products = products.filter((p: any) => p.id !== body.id)
+    const client = serverSupabaseServiceRole(event)
 
-    if (products.length === initialLength) {
+    const { error } = await client
+        .from('products')
+        .delete()
+        .eq('id', body.id)
+
+    if (error) {
         throw createError({
-            statusCode: 404,
-            statusMessage: 'Product not found'
+            statusCode: 500,
+            statusMessage: 'Failed to delete product',
+            data: error
         })
     }
 
-    fs.writeFileSync(productsPath, JSON.stringify(products, null, 2))
+    // Invalidate cache
+    const storage = useStorage('cache')
+    const productKeys = await storage.getKeys('api:products')
+    for (const key of productKeys) {
+        await storage.removeItem(key)
+    }
 
-    return { success: true }
+    return { success: true, message: 'Product deleted successfully' }
 })

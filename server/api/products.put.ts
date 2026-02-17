@@ -1,11 +1,24 @@
 import { readBody, createError } from 'h3'
-import fs from 'fs'
-import path from 'path'
-import { fileURLToPath } from 'url'
-
-const productsPath = path.resolve(process.cwd(), 'server/data/products.json')
+import { serverSupabaseServiceRole, serverSupabaseUser } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
+    // Check if user is admin
+    const user = await serverSupabaseUser(event)
+    if (!user) {
+        throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
+    }
+
+    const serviceClient = serverSupabaseServiceRole(event)
+    const { data: profile } = await serviceClient
+        .from('user_profiles')
+        .select('role')
+        .eq('auth_user_id', user.sub)
+        .single()
+
+    if (profile?.role !== 'admin') {
+        throw createError({ statusCode: 403, statusMessage: 'Forbidden: Admin access required' })
+    }
+
     const body = await readBody(event)
 
     if (!body.id) {
@@ -15,18 +28,39 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    let products = JSON.parse(fs.readFileSync(productsPath, 'utf-8'))
-    const index = products.findIndex((p: any) => p.id === body.id)
+    const { data: product, error } = await serviceClient
+        .from('products')
+        .update({
+            title: body.title,
+            price: Number(body.price),
+            description: body.description,
+            category: body.category,
+            image: body.image
+        })
+        .eq('id', body.id)
+        .select()
+        .single()
 
-    if (index === -1) {
+    if (error) {
+        if (error.code === 'PGRST116') {
+            throw createError({
+                statusCode: 404,
+                statusMessage: 'Product not found'
+            })
+        }
         throw createError({
-            statusCode: 404,
-            statusMessage: 'Product not found'
+            statusCode: 500,
+            statusMessage: 'Failed to update product',
+            data: error
         })
     }
 
-    products[index] = { ...products[index], ...body, price: Number(body.price) }
-    fs.writeFileSync(productsPath, JSON.stringify(products, null, 2))
+    // Invalidate cache
+    const storage = useStorage('cache')
+    const productKeys = await storage.getKeys('api:products')
+    for (const key of productKeys) {
+        await storage.removeItem(key)
+    }
 
-    return products[index]
+    return product
 })

@@ -1,10 +1,10 @@
 <template>
   <div class="container cart-page">
-    <h1>Your Shopping Cart</h1>
+    <h1>Tu Carrito de Compras</h1>
 
     <div v-if="items.length === 0" class="empty-cart">
-      <p>Your cart is empty.</p>
-      <NuxtLink to="/" class="btn">Start Shopping</NuxtLink>
+      <p>Tu carrito está vacío.</p>
+      <NuxtLink to="/" class="btn">Comprar Ahora</NuxtLink>
     </div>
 
     <div v-else class="cart-content">
@@ -22,23 +22,23 @@
               :value="item.quantity" 
               @change="updateQuantity(item.id, Number(($event.target as HTMLInputElement).value))"
             />
-            <button @click="removeFromCart(item.id)" class="remove-btn">Remove</button>
+            <button @click="removeFromCart(item.id)" class="remove-btn">Eliminar</button>
           </div>
         </div>
       </div>
 
       <div class="cart-summary">
-        <h2>Order Summary</h2>
+        <h2>Resumen del pedido</h2>
         <div class="summary-row">
           <span>Subtotal</span>
-          <span>{{ formatPrice(totalPrice) }}</span>
+          <span>{{ formatPrice(total) }}</span>
         </div>
         <div class="summary-row total">
           <span>Total</span>
-          <span>{{ formatPrice(totalPrice) }}</span>
+          <span>{{ formatPrice(total) }}</span>
         </div>
-        <button @click="checkout" class="btn btn-block" :disabled="loading">
-          {{ loading ? 'Processing...' : 'Proceed to Checkout' }}
+        <button @click="checkout" class="btn btn-block">
+          Proceder al Pago
         </button>
         <button @click="clearCart" class="btn-clear">Clear Cart</button>
       </div>
@@ -47,49 +47,12 @@
 </template>
 
 <script setup lang="ts">
-const { items, removeFromCart, updateQuantity, clearCart, totalPrice, formatPrice } = useCart()
-const { user } = useAuth()
+const { items, removeFromCart, updateQuantity, clearCart, total, formatPrice } = useCart()
 const router = useRouter()
-const loading = ref(false)
 
-onMounted(() => {
-  console.log('Cart Items on Mount:', items.value)
-})
-
-const checkout = async () => {
-  console.log('Checkout clicked')
-  console.log('User:', user.value)
-  console.log('Items:', items.value)
-  console.log('Total:', totalPrice.value)
-  if (!user.value) {
-    if (confirm('You need to login to checkout. Go to login page?')) {
-       router.push('/login')
-    }
-    return
-  }
-
+const checkout = () => {
   if (items.value.length === 0) return
-
-  loading.value = true
-  try {
-    const { success } = await $fetch('/api/orders', {
-      method: 'POST',
-      body: {
-        items: items.value,
-        total: totalPrice.value
-      }
-    })
-
-    if (success) {
-      clearCart()
-      // alert('Order placed successfully!')
-      router.push('/account/orders')
-    }
-  } catch (e: any) {
-    alert(e.statusMessage || 'Checkout failed')
-  } finally {
-    loading.value = false
-  }
+  router.push('/checkout')
 }
 </script>
 

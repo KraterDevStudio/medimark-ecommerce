@@ -7,10 +7,21 @@
       <h3 class="title">
         <NuxtLink :to="`/products/${product.id}`">{{ product.title }}</NuxtLink>
       </h3>
-      <p class="category">{{ product.category }}</p>
+      <p class="category">
+        <span v-for="(cat, index) in product.categories" :key="cat.id">
+          {{ cat.name }}<span v-if="index < product.categories.length - 1">, </span>
+        </span>
+        <span v-if="!product.categories || product.categories.length === 0">{{ product.category }}</span>
+      </p>
       <div class="footer">
         <span class="price">{{ formatPrice(product.price) }}</span>
-        <button class="btn btn-sm" @click="addToCart(product)">Add to Cart</button>
+
+        <div v-if="quantity > 0" class="quantity-selector">
+          <button class="btn-qty" @click="updateQuantity(product.id, quantity - 1)">-</button>
+          <span class="quantity-value">{{ quantity }}</span>
+          <button class="btn-qty" @click="updateQuantity(product.id, quantity + 1)">+</button>
+        </div>
+        <button v-else class="btn btn-sm" @click="addToCart(product)">Agregar al carrito</button>
       </div>
     </div>
   </div>
@@ -23,7 +34,9 @@ const props = defineProps<{
   product: Product
 }>()
 
-const { addToCart, formatPrice } = useCart()
+const { addToCart, updateQuantity, getItemQuantity, formatPrice } = useCart()
+
+const quantity = computed(() => getItemQuantity(props.product.id))
 </script>
 
 <style scoped>
@@ -99,5 +112,42 @@ const { addToCart, formatPrice } = useCart()
 .btn-sm {
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
+}
+
+.quantity-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--color-surface);
+  border-radius: 2rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--color-border);
+}
+
+.btn-qty {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: none;
+  background: white;
+  color: var(--color-text);
+  cursor: pointer;
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s;
+}
+
+.btn-qty:hover {
+  background: var(--color-accent);
+  color: white;
+}
+
+.quantity-value {
+  font-weight: 600;
+  min-width: 1.5rem;
+  text-align: center;
 }
 </style>
