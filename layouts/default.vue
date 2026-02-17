@@ -13,7 +13,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                   <!--Boxicons v3.0.8 https://boxicons.com | License  https://docs.boxicons.com/free-->
                   <path
-                    d="M18 10c0-4.41-3.59-8-8-8s-8 3.59-8 8 3.59-8 8 8c1.85 0 3.54-.63 4.9-1.69l5.1 5.1L21.41 20l-5.1-5.1A8 8 0 0 0 18 10M4 10c0-3.31 2.69-6 6-6s6 2.69 6 6-2.69 6-6 6-6-2.69-6-6">
+                    d="M18 10c0-4.41-3.59-8-8-8s-8 3.59-8 8 3.59 8 8 8c1.85 0 3.54-.63 4.9-1.69l5.1 5.1L21.41 20l-5.1-5.1A8 8 0 0 0 18 10M4 10c0-3.31 2.69-6 6-6s6 2.69 6 6-2.69 6-6 6-6-2.69-6-6">
                   </path>
                 </svg>
               </button>
@@ -21,7 +21,8 @@
 
             <!-- Search Results Dropdown -->
             <transition name="fade">
-              <div v-if="isSearchFocused && searchResults.length > 0" class="search-results-dropdown">
+              <div v-if="isSearchFocused && searchResults.length > 0" class="search-results-dropdown"
+                @mousedown.prevent>
                 <NuxtLink v-for="product in searchResults" :key="product.id" :to="`/products/${product.id}`"
                   class="search-result-item" @click="clearSearch">
                   <img :src="product.image" :alt="product.title" class="result-thumb" />
@@ -114,7 +115,7 @@
 
           <!-- Search Results Dropdown -->
           <transition name="fade">
-            <div v-if="isSearchFocused && searchResults.length > 0" class="search-results-dropdown">
+            <div v-if="isSearchFocused && searchResults.length > 0" class="search-results-dropdown" @mousedown.prevent>
               <NuxtLink v-for="product in searchResults" :key="product.id" :to="`/products/${product.id}`"
                 class="search-result-item" @click="clearSearch">
                 <img :src="product.image" :alt="product.title" class="result-thumb" />
@@ -338,6 +339,12 @@ const { data: categories } = await useFetch<Category[]>('/api/categories')
   width: 100%;
 }
 
+.header-bottom {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
 .header-actions {
   display: flex;
   align-items: center;
@@ -389,6 +396,7 @@ const { data: categories } = await useFetch<Category[]>('/api/categories')
   position: relative;
   flex: 1;
   max-width: 500px;
+  width: 100%;
 }
 
 .search-results-dropdown {
@@ -571,6 +579,16 @@ const { data: categories } = await useFetch<Category[]>('/api/categories')
 /* Mobile Search Row */
 .header-bottom.mobile-only {
   padding: 0 1rem 1rem;
+  display: flex;
+  justify-content: center;
+
+  @media (min-width: 1024px) {
+    display: none;
+  }
+}
+
+.header-bottom.mobile-only .search-bar-container {
+  max-width: none;
 }
 
 /* Mobile Menu Overlay */
