@@ -1,45 +1,71 @@
 <template>
   <div>
-    <!-- Make hero section be a carrousel of images with arrows to navigate and dots to show current slide-->
-    <div class="hero-carousel">
-      <div class="hero-slide" v-for="(image, index) in heroImages" :key="index">
-        <img :src="image" alt="Hero">
+    <!-- Hero Carousel -->
+    <div v-if="heroSlides?.length" class="hero-carousel">
+      <div v-for="(slide, index) in heroSlides" :key="index" class="hero-slide"
+        :class="{ active: currentSlide === index }">
+        <NuxtLink :to="slide.link_url || '#'">
+          <img :src="slide.image_url" alt="Hero">
+        </NuxtLink>
+      </div>
+      <div class="carousel-dots">
+        <button v-for="(_, index) in heroSlides" :key="index" @click="currentSlide = index"
+          :class="{ active: currentSlide === index }"></button>
       </div>
     </div>
 
-    <!-- <section class="hero">
-      <div class="container">
-        <h1>Bienvenido a MediMark</h1>
-        <p>Descubre nuestra colección curada de productos premium.</p>
-        <div class="hero-actions">
-           <button class="btn btn-outline" @click="scrollToProducts">Comprar Ahora</button>
+    <div class="container main-content-blocks">
+      <!-- Dynamic Sections -->
+      <section v-for="section in homeSections" :key="section.id" class="home-section">
+        <div class="section-header">
+          <h2 class="section-title">{{ section.title }}</h2>
+          <p v-if="section.description" class="section-subtitle">{{ section.description }}</p>
         </div>
-      </div>
-    </section> -->
 
-    <section id="products" class="container products-section">
-      <div class="section-header">
-        <h2 class="section-title">Últimos Productos</h2>
-        <p class="section-subtitle">Descubre lo nuevo</p>
-      </div>
+        <div class="grid product-grid">
+          <ProductCard v-for="product in section.products" :key="product.id" :product="product" />
+        </div>
+      </section>
 
-      <div v-if="status === 'pending'" class="loading">
-        <div class="spinner"></div> Cargando productos...
-      </div>
-      <div v-else-if="error" class="error">
-        Error al cargar productos.
-      </div>
-      <div v-else class="grid grid-cols-3 product-grid">
-        <ProductCard v-for="product in products" :key="product.id" :product="product" />
-      </div>
-    </section>
+      <!-- Default Section if no custom ones -->
+      <section v-if="!homeSections?.length" id="products" class="products-section">
+        <div class="section-header">
+          <h2 class="section-title">Nuestros Productos</h2>
+          <p class="section-subtitle">Descubre nuestra colección</p>
+        </div>
+
+        <div v-if="pending" class="loading">
+          <div class="spinner"></div> Cargando...
+        </div>
+        <div v-else class="grid product-grid">
+          <ProductCard v-for="product in products" :key="product.id" :product="product" />
+        </div>
+      </section>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { Product } from '~/composables/useCart'
 
-const { data: products, status, error } = await useFetch<Product[]>('/api/products')
+const { data: heroSlides } = await useFetch<any[]>('/api/content/hero')
+const { data: homeSections } = await useFetch<any[]>('/api/content/sections')
+const { data: products, pending } = await useFetch<Product[]>('/api/products')
+
+const currentSlide = ref(0)
+let timer: any = null
+
+onMounted(() => {
+  if (heroSlides.value?.length) {
+    timer = setInterval(() => {
+      currentSlide.value = (currentSlide.value + 1) % heroSlides.value!.length
+    }, 5000)
+  }
+})
+
+onUnmounted(() => {
+  if (timer) clearInterval(timer)
+})
 
 const scrollToProducts = () => {
   const el = document.getElementById('products')
@@ -48,29 +74,76 @@ const scrollToProducts = () => {
 </script>
 
 <style scoped>
-.hero {
-  background-color: var(--color-surface);
-  padding: 6rem 0;
-  margin-bottom: 4rem;
-  text-align: center;
+.hero-carousel {
+  position: relative;
+  height: 300px;
+  overflow: hidden;
+  background-color: #f3f4f6;
 }
 
-.hero h1 {
-  font-size: 3.5rem;
-  margin-bottom: 1.5rem;
-  letter-spacing: -0.05em;
-  font-weight: 800;
+@media (min-width: 1024px) {
+  .hero-carousel {
+    height: 550px;
+  }
 }
 
-.hero p {
-  font-size: 1.25rem;
-  color: #4b5563;
-  max-width: 600px;
-  margin: 0 auto 2rem;
+.hero-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.products-section {
-  padding-bottom: 4rem;
+.hero-slide.active {
+  opacity: 1;
+}
+
+.hero-slide a {
+  height: 100%;
+}
+
+.hero-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.carousel-dots {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 10;
+}
+
+.carousel-dots button {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+}
+
+.carousel-dots button.active {
+  background: white;
+}
+
+.home-section {
+  padding: 4rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.home-section:last-child {
+  border-bottom: none;
 }
 
 .section-header {
@@ -86,6 +159,7 @@ const scrollToProducts = () => {
 
 .section-subtitle {
   color: #6b7280;
+  font-size: 1.125rem;
 }
 
 .product-grid {
@@ -99,11 +173,5 @@ const scrollToProducts = () => {
   padding: 4rem;
   color: #6b7280;
   font-size: 1.25rem;
-}
-
-.error {
-  text-align: center;
-  color: red;
-  padding: 2rem;
 }
 </style>

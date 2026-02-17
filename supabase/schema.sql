@@ -297,3 +297,72 @@ CREATE POLICY "Service role can manage order items"
   USING (auth.role() = 'service_role');
 
 
+-- ============================================
+-- 7. HOMEPAGE CONTENT MANAGEMENT
+-- ============================================
+
+-- Hero Slides
+CREATE TABLE homepage_hero_slides (
+  id BIGSERIAL PRIMARY KEY,
+  image_url TEXT NOT NULL,
+  link_url TEXT,
+  display_order INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Custom Homepage Sections
+CREATE TABLE homepage_sections (
+  id BIGSERIAL PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT,
+  display_order INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Junction table for products in sections
+CREATE TABLE homepage_section_products (
+  section_id BIGINT REFERENCES homepage_sections(id) ON DELETE CASCADE,
+  product_id BIGINT REFERENCES products(id) ON DELETE CASCADE,
+  display_order INTEGER DEFAULT 0,
+  PRIMARY KEY (section_id, product_id)
+);
+
+-- RLS for homepage content
+ALTER TABLE homepage_hero_slides ENABLE ROW LEVEL SECURITY;
+ALTER TABLE homepage_sections ENABLE ROW LEVEL SECURITY;
+ALTER TABLE homepage_section_products ENABLE ROW LEVEL SECURITY;
+
+-- Public read access
+CREATE POLICY "Hero slides are viewable by everyone" ON homepage_hero_slides FOR SELECT USING (true);
+CREATE POLICY "Sections are viewable by everyone" ON homepage_sections FOR SELECT USING (true);
+CREATE POLICY "Section products are viewable by everyone" ON homepage_section_products FOR SELECT USING (true);
+
+-- Admin write access
+CREATE POLICY "Admin can manage hero slides" ON homepage_hero_slides FOR ALL
+  USING (auth.role() = 'service_role' OR EXISTS (
+    SELECT 1 FROM user_profiles
+    WHERE auth_user_id = auth.uid() AND role = 'admin'
+  ));
+
+CREATE POLICY "Admin can manage sections" ON homepage_sections FOR ALL
+  USING (auth.role() = 'service_role' OR EXISTS (
+    SELECT 1 FROM user_profiles
+    WHERE auth_user_id = auth.uid() AND role = 'admin'
+  ));
+
+CREATE POLICY "Admin can manage section products" ON homepage_section_products FOR ALL
+  USING (auth.role() = 'service_role' OR EXISTS (
+    SELECT 1 FROM user_profiles
+    WHERE auth_user_id = auth.uid() AND role = 'admin'
+  ));
+
+-- Update Triggers
+CREATE TRIGGER update_hero_slides_updated_at
+  BEFORE UPDATE ON homepage_hero_slides
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_homepage_sections_updated_at
+  BEFORE UPDATE ON homepage_sections
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
