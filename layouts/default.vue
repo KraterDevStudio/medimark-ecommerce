@@ -210,8 +210,11 @@
 
     <footer class="footer">
       <div class="footer-top">
-        <div class="footer-col">
-          <h3>MediMark</h3>
+        <div class="footer-col left">
+          <NuxtLink to="/">
+            <h3>MediMark</h3>
+          </NuxtLink>
+          <NuxtLink to="/">Preguntas frecuentes (FAQ)</NuxtLink>
         </div>
         <div class="footer-col">
           <h3>Enlaces</h3>
@@ -226,26 +229,32 @@
               <NuxtLink to="/cart">Carrito</NuxtLink>
             </li>
             <li>
-              <NuxtLink to="/account/orders">Cuenta</NuxtLink>
-            </li>
-            <li>
-              <NuxtLink to="/login">Iniciar Sesión</NuxtLink>
+              <NuxtLink to="/login">Cuenta</NuxtLink>
             </li>
           </ul>
         </div>
-        <div class="footer-col">
+        <div class="footer-col right">
           <h3>Contacto</h3>
           <ul>
             <!-- Instagram icon   -->
             <li>
+              <a href="https://www.instagram.com/medimark/" target="_blank">
+                Instagram
+              </a>
+            </li>
+            <li>
               medimark@medimark.com
             </li>
+
           </ul>
         </div>
       </div>
       <div class="footer-bottom">
         <p>&copy; 2026 MediMark. Todos los derechos reservados.</p>
         <p>Made by Krater.</p>
+      </div>
+      <div class="ecommerce-version">
+        <p>Krater CMS v0.0.1</p>
       </div>
     </footer>
   </div>
@@ -315,6 +324,23 @@ const { data: categories } = await useFetch<Category[]>('/api/categories')
 </script>
 
 <style scoped>
+.ecommerce-version::before {
+  content: "";
+  display: block;
+  height: 1px;
+  background-color: var(--color-border);
+}
+
+.ecommerce-version {
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.8rem;
+
+  p {
+    line-height: 4rem;
+  }
+}
+
 .layout {
   display: flex;
   flex-direction: column;
@@ -488,8 +514,8 @@ const { data: categories } = await useFetch<Category[]>('/api/categories')
 
 .cart-badge {
   position: absolute;
-  top: -20px;
-  right: -15px;
+  top: -15px;
+  right: -10px;
   background-color: #ef4444;
   color: white;
   font-size: 0.75rem;
@@ -696,8 +722,10 @@ const { data: categories } = await useFetch<Category[]>('/api/categories')
 
 .footer {
   text-align: center;
-  padding: 4em;
+  padding: 5em 2em 1em 2em;
   background-color: white;
+  width: 90%;
+  margin: 0 auto;
   border-top: 1px solid var(--color-border);
   color: #6b7280;
 }
@@ -726,7 +754,22 @@ const { data: categories } = await useFetch<Category[]>('/api/categories')
 
 .footer-col {
   flex: 1;
-  margin-right: 2rem;
+}
+
+.footer-col.left {
+  text-align: left;
+
+  @media(max-width: 768px) {
+    text-align: center;
+  }
+}
+
+.footer-col.right {
+  text-align: right;
+
+  @media(max-width: 768px) {
+    text-align: center;
+  }
 }
 
 .footer-col h3 {
@@ -757,5 +800,10 @@ const { data: categories } = await useFetch<Category[]>('/api/categories')
   margin-top: 2rem;
   display: flex;
   justify-content: space-between;
+
+  @media(max-width: 768px) {
+    flex-direction: column;
+    gap: 1rem;
+  }
 }
 </style>

@@ -2,8 +2,10 @@
   <div>
     <h2 class="section-title">Historial de Pedidos</h2>
 
-    <div v-if="loading" class="loading">Cargando pedidos...</div>
-    
+    <div v-if="loading" class="loading">
+      <div class="spinner"></div>
+    </div>
+
     <div v-else-if="!orders || orders.length === 0" class="empty-state">
       <p>Aún no has realizado ningún pedido.</p>
       <NuxtLink to="/" class="btn">Empezar a comprar</NuxtLink>
@@ -38,7 +40,7 @@
 <script setup lang="ts">
 const { formatPrice } = useCart()
 
-const { data: orders, pending: loading } = await useFetch('/api/orders')
+const { data: orders, pending: loading } = await useLazyFetch('/api/orders')
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('es-ES', {
@@ -50,13 +52,30 @@ const formatDate = (dateString: string) => {
 </script>
 
 <style scoped>
+.spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 0.25rem solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
 .section-title {
   margin-bottom: 2rem;
   font-size: 1.5rem;
   color: var(--color-text);
 }
 
-.loading, .empty-state {
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.loading,
+.empty-state {
   text-align: center;
   padding: 3rem;
   color: #6b7280;

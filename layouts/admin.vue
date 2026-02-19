@@ -5,14 +5,16 @@
       <button class="menu-toggle" @click="isSidebarOpen = !isSidebarOpen">
         <span>☰</span>
       </button>
-      <NuxtLink to="/admin" class="mobile-logo">MediMark Admin</NuxtLink>
+      <NuxtLink to="/admin" class="mobile-logo">MediMark</NuxtLink>
+      <p class="sub-text">Panel de administración</p>
     </header>
 
     <!-- Sidebar -->
     <aside class="sidebar" :class="{ 'is-open': isSidebarOpen }">
       <div class="sidebar-header">
         <div class="brand">
-          <NuxtLink to="/admin" @click="isSidebarOpen = false">MediMark Admin</NuxtLink>
+          <NuxtLink to="/admin" @click="isSidebarOpen = false">MediMark</NuxtLink>
+          <p class="sub-text">Admin panel</p>
         </div>
         <button class="mobile-only close-btn" @click="isSidebarOpen = false">✕</button>
       </div>
@@ -21,6 +23,7 @@
         <NuxtLink to="/admin" exact-active-class="active" @click="isSidebarOpen = false">Productos</NuxtLink>
         <NuxtLink to="/admin/categories" exact-active-class="active" @click="isSidebarOpen = false">Categorías
         </NuxtLink>
+        <NuxtLink to="/admin/orders" exact-active-class="active" @click="isSidebarOpen = false">Ordenes</NuxtLink>
         <NuxtLink to="/admin/content" exact-active-class="active" @click="isSidebarOpen = false">Contenido</NuxtLink>
         <NuxtLink to="/" target="_blank">Ver Tienda</NuxtLink>
       </nav>
@@ -75,6 +78,12 @@ const pageTitle = computed(() => {
 </script>
 
 <style scoped>
+.sub-text {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
 .admin-layout {
   display: flex;
   min-height: 100vh;

@@ -10,6 +10,13 @@ export default defineNuxtConfig({
     nitro: {
         preset: 'vercel'
     },
+    runtimeConfig: {
+        smtpHost: process.env.SMTP_HOST,
+        smtpPort: process.env.SMTP_PORT,
+        smtpUser: process.env.SMTP_USER,
+        smtpPass: process.env.SMTP_PASS,
+        adminEmail: process.env.ADMIN_EMAIL
+    },
     app: {
         head: {
             title: 'MediMark',

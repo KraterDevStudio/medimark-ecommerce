@@ -2,26 +2,19 @@
   <div class="container login-page">
     <div class="login-card">
       <h1>Iniciar sesión</h1>
+      <p class="register-link"> Inicia sesión para ver tus pedidos y más</p>
+      <br>
       <form @submit.prevent="handleLogin">
         <div class="form-group">
           <label for="email">Correo electrónico</label>
-          <input 
-            type="text" 
-            id="email" 
-            v-model="email" 
-            placeholder="Correo electrónico"
-            required 
-          />
+          <input type="text" id="email" v-model="email" placeholder="Correo electrónico" required />
         </div>
         <div class="form-group">
           <label for="password">Contraseña</label>
-          <input 
-            type="password" 
-            id="password" 
-            v-model="password" 
-            placeholder="********"
-            required 
-          />
+          <input type="password" id="password" v-model="password" placeholder="********" required />
+          <div class="forgot-password">
+            <NuxtLink to="/forgot-password">Olvidé mi contraseña</NuxtLink>
+          </div>
         </div>
         <p v-if="error" class="error-msg">{{ error }}</p>
         <button type="submit" class="btn btn-block" :disabled="loading">
@@ -36,19 +29,38 @@
 </template>
 
 <style scoped>
+.forgot-password {
+  text-align: right;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.forgot-password a {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.forgot-password a:hover {
+  text-decoration: underline;
+}
+
 .register-link {
   text-align: center;
   margin-top: 1.5rem;
   font-size: 0.875rem;
   color: #6b7280;
 }
+
 .register-link a {
   color: var(--color-accent);
   font-weight: 600;
 }
+
 .register-link a:hover {
   text-decoration: underline;
 }
+
 .login-page {
   min-height: 60vh;
   display: flex;
@@ -124,16 +136,16 @@ watchEffect(() => {
 const handleLogin = async () => {
   loading.value = true
   error.value = ''
-  
+
   try {
-      const success = await login({ email: email.value, password: password.value })
-      if (!success) {
-          error.value = 'Invalid login credentials'
-      }
-  } catch(e) {
-      error.value = 'An error occurred'
+    const success = await login({ email: email.value, password: password.value })
+    if (!success) {
+      error.value = 'Invalid login credentials'
+    }
+  } catch (e) {
+    error.value = 'An error occurred'
   } finally {
-      loading.value = false
+    loading.value = false
   }
 }
 </script>

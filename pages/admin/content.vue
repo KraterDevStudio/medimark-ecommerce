@@ -1,15 +1,20 @@
 <template>
     <div class="admin-content">
         <div class="tabs">
-            <button @click="activeTab = 'hero'" :class="{ active: activeTab === 'hero' }">Hero Carousel</button>
-            <button @click="activeTab = 'sections'" :class="{ active: activeTab === 'sections' }">Secciones
+            <button @click="activeTab = 'hero'" :class="{ active: activeTab === 'hero' }">Carrousel de
+                Contenidos</button>
+            <button @click="activeTab = 'sections'" :class="{ active: activeTab === 'sections' }">Secciones de la
                 Home</button>
         </div>
 
+        <div v-if="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Cargando...</p>
+        </div>
         <!-- Hero Carousel Management -->
         <div v-if="activeTab === 'hero'" class="hero-manager">
             <div class="section-header">
-                <h2>Hero Carousel</h2>
+                <h2>Carrousel de Contenidos</h2>
                 <button @click="addSlide" class="btn-primary">Añadir Slide</button>
             </div>
 
@@ -140,6 +145,7 @@ const sections = ref<any[]>([])
 const allProducts = ref<Product[]>([])
 const savingHero = ref(false)
 const savingSection = ref(false)
+const loading = ref(true);
 
 // Fetch Initial Data
 const loadData = async () => {
@@ -151,6 +157,7 @@ const loadData = async () => {
     heroSlides.value = heroData as any[]
     sections.value = sectionData as any[]
     allProducts.value = productData as Product[]
+    loading.value = false;
 }
 
 onMounted(loadData)
@@ -293,12 +300,24 @@ const moveSection = async (index: number, direction: number) => {
 </script>
 
 <style scoped>
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    margin-top: 2rem;
+}
+
 .tabs {
     display: flex;
     gap: 1rem;
     margin-bottom: 2rem;
     border-bottom: 1px solid var(--color-border);
     padding-bottom: 1rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
 }
 
 .tabs button {
@@ -341,6 +360,22 @@ const moveSection = async (index: number, direction: number) => {
     align-items: center;
 }
 
+@media (max-width: 640px) {
+
+    .slide-item,
+    .section-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .slide-preview img {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 16/9;
+    }
+}
+
 .slide-preview img {
     width: 150px;
     height: 80px;
@@ -374,7 +409,7 @@ const moveSection = async (index: number, direction: number) => {
 }
 
 .btn-icon {
-    width: 32px;
+    width: 60px;
     height: 32px;
     border: 1px solid var(--color-border);
     background: white;
@@ -447,6 +482,17 @@ const moveSection = async (index: number, direction: number) => {
     max-width: 600px;
     max-height: 90vh;
     overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+    .modal-content {
+        width: 100%;
+        max-width: none;
+        height: 100%;
+        max-height: 100%;
+        border-radius: 0;
+        padding: 1rem;
+    }
 }
 
 .modal-header {

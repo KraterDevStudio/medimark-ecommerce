@@ -1,15 +1,28 @@
-import { serverSupabaseClient } from '#supabase/server'
+import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
     const { category, search } = getQuery(event)
     const storage = useStorage('cache')
-    const cacheKey = `api:products:cat:${category || 'all'}:search:${search || 'none'}`
+
+    // Check if user is admin
+    const user = await serverSupabaseUser(event)
+    const client = await serverSupabaseClient(event)
+    let isAdmin = false
+
+    if (user) {
+        const { data: profile } = await client
+            .from('user_profiles')
+            .select('role')
+            .eq('auth_user_id', user.sub)
+            .maybeSingle()
+        isAdmin = profile?.role === 'admin'
+    }
+
+    const cacheKey = `products_${isAdmin ? 'admin' : 'public'}_${category || 'all'}_${search || 'none'}`
 
     // Try to get from cache
     const cached = await storage.getItem(cacheKey)
     if (cached) return cached
-
-    const client = await serverSupabaseClient(event)
 
     // Base select - always fetch all categories for display
     let selectQuery = `
@@ -41,6 +54,11 @@ export default defineEventHandler(async (event) => {
         query = query.ilike('title', `%${search}%`)
     }
 
+    // Filter archived products for non-admins
+    if (!isAdmin) {
+        query = query.eq('is_archived', false)
+    }
+
     const { data: products, error } = await query.order('created_at', { ascending: false })
 
     if (error) {
@@ -53,12 +71,12 @@ export default defineEventHandler(async (event) => {
 
     // Transform result to flatten categories
     const transformedProducts = products.map(product => {
-        const categories = product.categories.map((pc: any) => pc.category).filter(Boolean)
+        const categories = (product.categories as any[]).map((pc: any) => pc.category).filter(Boolean)
         // We'll keep the full categories array, but also a string for legacy simple display
         const categoryString = categories.map((c: any) => c.name).join(', ')
 
         // Remove the internal filter alias if present
-        const { filter_categories, ...rest } = product
+        const { filter_categories, ...rest } = product as any
 
         return {
             ...rest,

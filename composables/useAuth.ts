@@ -102,7 +102,13 @@ export const useAuth = () => {
         router.push('/login')
     }
 
+    const forgotPassword = async (email: string) => {
+        const { error } = await supabase.auth.resetPasswordForEmail(email)
+        if (error) console.error('Forgot password failed', error)
+        return !error
+    }
+
     const isAdmin = computed(() => profile.value?.role === 'admin')
 
-    return { user, profile, isAdmin, loadingProfile, fetchProfile, login, register, logout }
+    return { user, profile, isAdmin, loadingProfile, fetchProfile, login, register, logout, forgotPassword }
 }

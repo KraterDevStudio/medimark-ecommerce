@@ -16,7 +16,18 @@
 
     <div class="container main-content-blocks">
       <!-- Dynamic Sections -->
-      <section v-for="section in homeSections" :key="section.id" class="home-section">
+      <template v-if="sectionsPending">
+        <section v-for="i in 2" :key="i" class="home-section">
+          <div class="section-header">
+            <div class="skeleton" style="height: 2.5rem; width: 300px; margin: 0 auto 0.5rem;"></div>
+            <div class="skeleton" style="height: 1.5rem; width: 200px; margin: 0 auto;"></div>
+          </div>
+          <div class="grid product-grid">
+            <ProductSkeleton v-for="j in 4" :key="j" />
+          </div>
+        </section>
+      </template>
+      <section v-else v-for="section in homeSections" :key="section.id" class="home-section">
         <div class="section-header">
           <h2 class="section-title">{{ section.title }}</h2>
           <p v-if="section.description" class="section-subtitle">{{ section.description }}</p>
@@ -34,8 +45,8 @@
           <p class="section-subtitle">Descubre nuestra colección</p>
         </div>
 
-        <div v-if="pending" class="loading">
-          <div class="spinner"></div> Cargando...
+        <div v-if="pending" class="grid product-grid">
+          <ProductSkeleton v-for="i in 4" :key="i" />
         </div>
         <div v-else class="grid product-grid">
           <ProductCard v-for="product in products" :key="product.id" :product="product" />
@@ -47,10 +58,10 @@
 
 <script setup lang="ts">
 import type { Product } from '~/composables/useCart'
-
-const { data: heroSlides } = await useFetch<any[]>('/api/content/hero')
-const { data: homeSections } = await useFetch<any[]>('/api/content/sections')
-const { data: products, pending } = await useFetch<Product[]>('/api/products')
+// useLazyFetch is used to fetch data on demand, i.e., when the user scrolls to the section
+const { data: heroSlides } = await useLazyFetch<any[]>('/api/content/hero')
+const { data: homeSections, pending: sectionsPending } = await useLazyFetch<any[]>('/api/content/sections')
+const { data: products, pending } = await useLazyFetch<Product[]>('/api/products')
 
 const currentSlide = ref(0)
 let timer: any = null

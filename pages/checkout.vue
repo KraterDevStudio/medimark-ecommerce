@@ -26,41 +26,32 @@
       <div class="checkout-form">
         <form @submit.prevent="handleSubmit">
           <h2>Información de Contacto</h2>
-          
+          <!-- Indicar en cartel amarillo que es importante que los datos esten bien ya que nos comunicaremos por whatsapp/email -->
+
+          <div class="info-box">
+            <p>Es importante que los datos sean correctos ya que nos comunicaremos por Whatsapp para coordinar la
+              compra.</p>
+          </div>
+
           <div class="form-group">
             <label for="name">Nombre Completo *</label>
-            <input
-              type="text"
-              id="name"
-              v-model="formData.name"
-              required
-              placeholder="Juan Pérez"
-            />
+            <input type="text" id="name" v-model="formData.name" required placeholder="Juan Pérez" />
           </div>
 
           <div class="form-group">
             <label for="email">Email *</label>
-            <input
-              type="email"
-              id="email"
-              v-model="formData.email"
-              required
-              placeholder="juan@example.com"
-            />
+            <input type="email" id="email" v-model="formData.email" required placeholder="juan@example.com" />
           </div>
 
           <div class="form-group">
             <label for="phone">Teléfono *</label>
-            <input
-              type="tel"
-              id="phone"
-              v-model="formData.phone"
-              required
-              placeholder="+54 11 1234-5678"
-            />
+            <input type="tel" id="phone" v-model="formData.phone" required placeholder="+54 11 1234-5678" />
           </div>
 
-          <h2>Dirección de Envío</h2>
+          <h2> Envío </h2>
+          <p> Una vez realices el pedido, nos pondremos en contacto para coordinar la entrega.</p>
+
+          <!-- <h2>Dirección de Envío</h2>
 
           <div class="form-group">
             <label for="address">Dirección *</label>
@@ -106,22 +97,16 @@
               required
               placeholder="Buenos Aires"
             />
-          </div>
+          </div> -->
 
           <h2>Método de Pago</h2>
-
+          <br>
           <div class="payment-methods">
             <label class="payment-option">
-              <input
-                type="radio"
-                name="paymentMethod"
-                value="transferencia"
-                v-model="formData.paymentMethod"
-                checked
-              />
+              <input type="radio" name="paymentMethod" value="transferencia" v-model="formData.paymentMethod" checked />
               <div class="payment-info">
-                <strong>Transferencia Bancaria</strong>
-                <p>Recibirás los datos bancarios por email para completar el pago</p>
+                <strong>Transferencia Bancaria o Efectivo</strong>
+                <p> Por el momento solo aceptaremos estos métodos de pago.</p>
               </div>
             </label>
           </div>
@@ -153,10 +138,6 @@ const formData = ref({
   name: user.value?.name || '',
   email: user.value?.email || '',
   phone: '',
-  address: '',
-  city: '',
-  postalCode: '',
-  province: '',
   paymentMethod: 'transferencia'
 })
 
@@ -175,10 +156,6 @@ const handleSubmit = async () => {
         name: formData.value.name,
         email: formData.value.email,
         phone: formData.value.phone,
-        address: formData.value.address,
-        city: formData.value.city,
-        postalCode: formData.value.postalCode,
-        province: formData.value.province
       },
       paymentMethod: formData.value.paymentMethod
     }
@@ -202,6 +179,14 @@ const handleSubmit = async () => {
 </script>
 
 <style scoped>
+.info-box {
+  background-color: #fff3cd;
+  border-left: 5px solid #ffc107;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  color: #374151;
+}
+
 .checkout-page {
   padding: 2rem 0;
   max-width: 1200px;
@@ -233,6 +218,10 @@ h1 {
   height: fit-content;
   position: sticky;
   top: 2rem;
+
+  @media (max-width: 968px) {
+    position: static;
+  }
 }
 
 .order-summary h2 {

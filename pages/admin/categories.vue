@@ -1,11 +1,15 @@
 <template>
   <div class="admin-categories">
     <div class="header-actions">
-      <button @click="openCreateModal(null)" class="btn-primary">Add New Category</button>
+      <button @click="openCreateModal(null)" class="btn-primary btn-action-mobile">Agregar Nueva Categoría</button>
     </div>
 
     <div class="categories-list">
-      <div v-if="loading" class="loading">Loading categories...</div>
+
+      <div v-if="loading" class="loading">
+        <div class="spinner"></div>
+      </div>
+
       <div v-else-if="!categories || categories.length === 0" class="empty-state">No categories found.</div>
 
       <div v-else class="category-tree">
@@ -76,7 +80,7 @@ interface Category {
   children?: Category[]
 }
 
-const { data: categories, pending: loading, refresh } = await useFetch<Category[]>('/api/categories')
+const { data: categories, pending: loading, refresh } = await useLazyFetch<Category[]>('/api/categories')
 
 // Flatten categories for the parent selector
 const flattenCategories = (cats: Category[] | null): Category[] => {
@@ -198,6 +202,15 @@ const CategoryItem = defineComponent({
 </script>
 
 <style scoped>
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  margin-top: 2rem;
+}
+
 .header-actions {
   display: flex;
   justify-content: flex-end;
@@ -316,6 +329,18 @@ const CategoryItem = defineComponent({
   width: 90%;
   max-width: 500px;
   padding: 1.5rem;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .modal-content {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: 100%;
+    border-radius: 0;
+  }
 }
 
 .modal-header {

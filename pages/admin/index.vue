@@ -1,11 +1,15 @@
 <template>
   <div class="admin-dashboard">
     <div class="actions-bar">
-      <button @click="openCreateModal()" class="btn">Agregar Nuevo Producto</button>
+      <button @click="openCreateModal()" class="btn btn-action-mobile">Agregar Nuevo Producto</button>
+    </div>
+
+    <div v-if="pending" class="loading">
+      <div class="spinner"></div>
     </div>
 
     <div class="table-container">
-      <table class="product-table">
+      <table class="product-table" v-if="!pending">
         <thead>
           <tr>
             <th>Imagen</th>
@@ -20,13 +24,27 @@
             <td>
               <img :src="product.image" class="thumb" />
             </td>
-            <td class="product-name">{{ product.title }}</td>
+            <td class="product-name">
+              {{ product.title }}
+              <span v-if="product.is_archived" class="badge badge-archived">Archivado</span>
+            </td>
             <td>{{ product.category }}</td>
             <td>{{ formatPrice(product.price) }}</td>
             <td>
-              <div class="action-buttons">
-                <button @click="openEditModal(product)" class="btn-icon edit">Editar</button>
-                <button @click="deleteProduct(product.id)" class="btn-icon delete">Eliminar</button>
+              <div class="action-menu-container">
+                <button @click.stop="toggleMenu(product.id)" class="btn-dots">
+                  <svg viewBox="0 0 24 24" width="20" height="20">
+                    <path fill="currentColor"
+                      d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+                  </svg>
+                </button>
+                <div v-if="activeMenu === product.id" class="dropdown-menu" v-click-outside="closeMenu">
+                  <button @click="openEditModal(product)">Editar</button>
+                  <button @click="toggleArchive(product)">
+                    {{ product.is_archived ? 'Desarchivar' : 'Archivar' }}
+                  </button>
+                  <button @click="deleteProduct(product.id)" class="delete-btn">Eliminar</button>
+                </div>
               </div>
             </td>
           </tr>
@@ -35,7 +53,7 @@
     </div>
 
     <!-- Create/Edit Modal -->
-    <div v-if="showModal" class="modal-overlay" @click="closeModal">
+    <div v-if="showModal" class="modal-overlay">
       <div class="modal-content" @click.stop>
         <header class="modal-header">
           <h3>{{ isEditing ? 'Editar Producto' : 'Agregar Producto' }}</h3>
@@ -58,7 +76,12 @@
           <div class="form-group">
             <label>Categorias</label>
             <div class="categories-select">
-              <div v-if="loadingCategories">Loading categories...</div>
+              <div v-if="loadingCategories">
+                <div class="loading">
+                  <div class="spinner"></div>
+                </div>
+                Loading categories...
+              </div>
               <div v-else class="checkbox-grid">
                 <label v-for="cat in flatCategories" :key="cat.id" class="checkbox-label">
                   <input type="checkbox" :value="cat.id" v-model="form.categoryIds">
@@ -79,9 +102,9 @@
           </div>
 
           <div class="form-actions">
-            <NuxtLink to="/admin" class="btn-cancel">Cancelar</NuxtLink>
+            <button type="button" class="btn-cancel" @click="closeModal">Cancelar</button>
             <button type="submit" class="btn" :disabled="loading">
-              {{ loading ? 'Guardando...' : 'Agregar Producto' }}
+              {{ loading ? 'Guardando...' : (isEditing ? 'Guardar Cambios' : 'Agregar Producto') }}
             </button>
           </div>
         </form>
@@ -98,10 +121,11 @@ definePageMeta({
   middleware: 'admin'
 })
 
-const { data: products, refresh } = await useFetch<Product[]>('/api/products')
+const { data: products, refresh, pending } = await useLazyFetch<Product[]>('/api/products')
 const { formatPrice } = useCart()
 
 const form = reactive({
+  id: null as number | null,
   title: '',
   price: '',
   categoryIds: [] as number[],
@@ -112,22 +136,65 @@ const form = reactive({
 const isEditing = ref(false)
 const showModal = ref(false)
 const loading = ref(false)
+const activeMenu = ref<number | null>(null)
 const router = useRouter()
+
+const toggleMenu = (id: number) => {
+  activeMenu.value = activeMenu.value === id ? null : id
+}
+
+const closeMenu = () => {
+  activeMenu.value = null
+}
+
+const toggleArchive = async (product: Product) => {
+  try {
+    await $fetch('/api/products', {
+      method: 'PUT',
+      body: {
+        ...product,
+        is_archived: !product.is_archived
+      }
+    })
+    await refresh()
+    activeMenu.value = null
+  } catch (e) {
+    alert('Failed to archive product')
+  }
+}
+
+// Custom directive for clicking outside
+const vClickOutside = {
+  mounted(el: any, binding: any) {
+    el.clickOutsideEvent = (event: Event) => {
+      if (!(el === event.target || el.contains(event.target))) {
+        binding.value()
+      }
+    }
+    document.addEventListener('click', el.clickOutsideEvent)
+  },
+  unmounted(el: any) {
+    document.removeEventListener('click', el.clickOutsideEvent)
+  }
+}
 
 const openCreateModal = () => {
   isEditing.value = false
-  form.categoryIds = []
-  form.description = ''
-  form.price = ''
+  form.id = null
   form.title = ''
+  form.price = ''
+  form.categoryIds = []
+  form.image = 'https://placehold.co/600x400'
+  form.description = ''
   showModal.value = true
 }
 
 const openEditModal = (product: Product) => {
   isEditing.value = true
+  form.id = product.id
   form.title = product.title
   form.price = product.price.toString()
-  form.categoryIds = product.categories?.map((cat: any) => cat.id) || []
+  form.categoryIds = product.categories?.map((cat: any) => cat.category.id) || []
   form.image = product.image
   form.description = product.description
   showModal.value = true
@@ -182,14 +249,17 @@ const flatCategories = computed(() => flattenCategories(categories.value || []))
 const saveProduct = async () => {
   loading.value = true
   try {
-    await $fetch('/api/products', {
-      method: 'POST',
+    const url = '/api/products'
+    const method = isEditing.value ? 'PUT' : 'POST'
+
+    await $fetch(url, {
+      method,
       body: form
     })
     await refresh()
     closeModal()
   } catch (e: any) {
-    alert(e.statusMessage || 'Error creating product')
+    alert(e.data?.statusMessage || e.statusMessage || 'Error saving product')
   } finally {
     loading.value = false
   }
@@ -197,6 +267,20 @@ const saveProduct = async () => {
 </script>
 
 <style scoped>
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
 .actions-bar {
   margin-bottom: 2rem;
   display: flex;
@@ -206,14 +290,17 @@ const saveProduct = async () => {
 .table-container {
   background: white;
   border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border: 1px solid var(--color-border);
-  overflow: hidden;
 }
 
 .product-table {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
+  min-width: 800px;
 }
 
 .product-table th,
@@ -241,26 +328,97 @@ const saveProduct = async () => {
   font-weight: 500;
 }
 
-.action-buttons {
-  display: flex;
-  gap: 0.5rem;
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
 }
 
-.btn-icon {
-  font-size: 0.875rem;
-  cursor: pointer;
-  text-decoration: underline;
+.badge-archived {
+  background-color: #f3f4f6;
+  color: #4b5563;
+  border: 1px solid #d1d5db;
+}
+
+.action-menu-container {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-dots {
   background: none;
   border: none;
-  padding: 0;
+  cursor: pointer;
+  padding: 0.5rem;
+  color: #6b7280;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
 }
 
-.btn-icon.edit {
-  color: var(--color-accent);
+.btn-dots:hover {
+  background-color: #f3f4f6;
+  color: var(--color-primary);
 }
 
-.btn-icon.delete {
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-lg);
+  z-index: 10;
+  min-width: 150px;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 0;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-menu button {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: #374151;
+  width: 100%;
+}
+
+.dropdown-menu button:hover {
+  background-color: #f9fafb;
+  color: var(--color-primary);
+}
+
+.dropdown-menu .delete-btn {
   color: #ef4444;
+  border-top: 1px solid #f3f4f6;
+}
+
+.dropdown-menu .delete-btn:hover {
+  background-color: #fef2f2;
+  color: #dc2626;
 }
 
 /* modal styles*/
@@ -283,6 +441,19 @@ const saveProduct = async () => {
   width: 90%;
   max-width: 500px;
   padding: 1.5rem;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .modal-content {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: 100%;
+    border-radius: 0;
+    padding: 1rem;
+  }
 }
 
 .modal-header {

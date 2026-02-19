@@ -11,8 +11,12 @@
   },
   "devDependencies": {
     "@nuxtjs/supabase": "^2.0.3",
+    "@types/nodemailer": "^7.0.10",
     "nuxt": "^3.12.0",
     "vue": "^3.4.0",
     "vue-router": "^4.3.0"
+  },
+  "dependencies": {
+    "nodemailer": "^8.0.1"
   }
 }

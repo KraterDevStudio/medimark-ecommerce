@@ -1,9 +1,12 @@
 <template>
   <div class="admin-orders">
     <div class="actions-bar">
-      <button @click="openCreateModal()" class="btn">Agregar Orden</button>
+      <button @click="openCreateModal()" class="btn btn-action-mobile">Agregar Orden</button>
     </div>
-    <div class="table-container">
+    <div v-if="pending" class="loading">
+      <div class="spinner"></div>
+    </div>
+    <div class="table-container" v-if="!pending">
       <table class="orders-table">
         <thead>
           <tr>
@@ -251,8 +254,8 @@ interface Product {
   categories?: any[]
 }
 
-const { data: orders, refresh } = await useFetch<Order[]>('/api/orders')
-const { data: allProducts } = await useFetch<Product[]>('/api/products')
+const { data: orders, refresh, pending } = await useLazyFetch<Order[]>('/api/orders')
+const { data: allProducts } = await useLazyFetch<Product[]>('/api/products')
 const { formatPrice } = useCart()
 const selectedOrder = ref<Order | null>(null)
 
@@ -406,17 +409,28 @@ const getStatusClass = (status: string) => {
 </script>
 
 <style scoped>
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
+  width: 100%;
+  margin-top: 2rem;
+}
+
 .table-container {
   background: white;
   border-radius: 0.5rem;
   border: 1px solid var(--color-border);
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .orders-table {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
+  min-width: 900px;
 }
 
 .orders-table th,
@@ -518,6 +532,16 @@ const getStatusClass = (status: string) => {
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+@media (max-width: 768px) {
+  .modal-content {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: 100%;
+    border-radius: 0;
+  }
 }
 
 .modal-header {

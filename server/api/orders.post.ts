@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
 
     const { name, email, phone, address, city, postalCode, province } = body.customerInfo
 
-    if (!name || !email || !phone || !address || !city || !postalCode || !province) {
+    if (!name || !email || !phone) {
         throw createError({ statusCode: 400, statusMessage: 'All customer information fields are required' })
     }
 
@@ -118,6 +118,73 @@ export default defineEventHandler(async (event) => {
             statusMessage: 'Failed to create order items',
             data: itemsError
         })
+    }
+
+    // Send email notification to admin
+    const config = useRuntimeConfig()
+    if (config.adminEmail && config.smtpHost) {
+        try {
+            const nodemailer = await import('nodemailer')
+            // @ts-ignore
+            const transporter = nodemailer.createTransport({
+                host: config.smtpHost,
+                port: parseInt(config.smtpPort as string) || 587,
+                secure: config.smtpPort === '465',
+                auth: {
+                    user: config.smtpUser,
+                    pass: config.smtpPass
+                }
+            })
+
+            const itemsHtml = body.items.map((item: any) => `
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd;">${item.title}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">${item.quantity}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">$${item.price.toLocaleString()}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">$${(item.price * item.quantity).toLocaleString()}</td>
+                </tr>
+            `).join('')
+
+            const customerInfo = body.customerInfo
+            const mailOptions = {
+                from: `"MediMark Store" <${config.smtpUser}>`,
+                to: config.adminEmail,
+                subject: `Nuevo Pedido Recibido #${order.id}`,
+                html: `
+                    <h2>Nuevo Pedido Recibido</h2>
+                    <p><strong>Nro de Pedido:</strong> #${order.id}</p>
+                    <p><strong>Total:</strong> $${body.total.toLocaleString()}</p>
+                    
+                    <h3>Datos del Cliente</h3>
+                    <p><strong>Nombre:</strong> ${customerInfo.name}</p>
+                    <p><strong>Email:</strong> ${customerInfo.email}</p>
+                    <p><strong>Teléfono:</strong> ${customerInfo.phone}</p>
+                    <p><strong>Dirección:</strong> ${customerInfo.address}, ${customerInfo.city}, ${customerInfo.province} (${customerInfo.postalCode})</p>
+                    
+                    <h3>Productos</h3>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background-color: #f2f2f2;">
+                                <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Producto</th>
+                                <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Cantidad</th>
+                                <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Precio Unit.</th>
+                                <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${itemsHtml}
+                        </tbody>
+                    </table>
+                `
+            }
+
+            // @ts-ignore
+            await transporter.sendMail(mailOptions)
+            console.log('Order notification email sent successfully')
+        } catch (mailError) {
+            console.error('Failed to send order notification email:', mailError)
+            // We don't throw here to avoid failing the order if email fails
+        }
     }
 
     return { success: true, orderId: order.id }

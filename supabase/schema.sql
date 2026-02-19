@@ -11,6 +11,7 @@ CREATE TABLE products (
   description TEXT,
   category TEXT,
   image TEXT,
+  is_archived BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );

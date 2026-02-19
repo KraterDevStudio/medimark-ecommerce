@@ -1,24 +1,35 @@
 <template>
   <div>
     <h2 class="section-title">Información Personal</h2>
-    
+
     <div v-if="user" class="info-grid">
-      <div class="info-item">
-        <label>Nombre</label>
-        <p>{{ user.user_metadata?.name || 'No especificado' }}</p>
+      <div class="info-column">
+        <div class="info-item">
+          <label>Nombre</label>
+          <p>{{ user.user_metadata?.name || 'No especificado' }}</p>
+        </div>
+
+        <div class="info-item">
+          <label>Email</label>
+          <p>{{ user.email }}</p>
+        </div>
+
+        <div class="info-item">
+          <label>Rol</label>
+          <p class="role-badge">{{ profile?.role || 'Cliente' }}</p>
+        </div>
       </div>
-      
-      <div class="info-item">
-        <label>Email</label>
-        <p>{{ user.email }}</p>
+
+      <div class="info-column">
+        <div class="info-item">
+          <label>Contraseña</label>
+          <p>********</p>
+          <NuxtLink to="/forgot-password" class="change-password-link">Cambiar contraseña</NuxtLink>
+        </div>
       </div>
-      
-      <div class="info-item">
-        <label>Rol</label>
-        <p class="role-badge">{{ profile?.role || 'Cliente' }}</p>
-      </div>
+
     </div>
-    
+
     <div class="actions">
       <button class="btn btn-secondary" disabled>Editar Perfil (Próximamente)</button>
     </div>
@@ -30,6 +41,12 @@ const { user, profile } = useAuth()
 </script>
 
 <style scoped>
+.change-password-link {
+  color: var(--color-accent);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
 .section-title {
   margin-bottom: 2rem;
   font-size: 1.5rem;
@@ -38,9 +55,15 @@ const { user, profile } = useAuth()
 
 .info-grid {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 1.5rem;
   margin-bottom: 2.5rem;
+}
+
+.info-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .info-item label {

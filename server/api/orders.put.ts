@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusCode: 400, statusMessage: 'Order ID and status are required' })
     }
 
-    const validStatuses = ['Pendiente', 'Paga', 'Completada']
+    const validStatuses = ['Pendiente', 'Paga', 'Completada', 'Cancelada']
     if (!validStatuses.includes(status)) {
         throw createError({ statusCode: 400, statusMessage: 'Invalid status' })
     }

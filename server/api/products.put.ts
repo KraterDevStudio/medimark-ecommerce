@@ -34,8 +34,8 @@ export default defineEventHandler(async (event) => {
             title: body.title,
             price: Number(body.price),
             description: body.description,
-            category: body.category,
-            image: body.image
+            image: body.image,
+            is_archived: body.is_archived
         })
         .eq('id', body.id)
         .select()
@@ -55,9 +55,35 @@ export default defineEventHandler(async (event) => {
         })
     }
 
+    // 2. Update Category Relationships
+    if (body.categoryIds && Array.isArray(body.categoryIds)) {
+        // First delete existing relationships
+        await serviceClient
+            .from('product_categories')
+            .delete()
+            .eq('product_id', body.id)
+
+        // Then insert new ones
+        if (body.categoryIds.length > 0) {
+            const categoryLinks = body.categoryIds.map((catId: number) => ({
+                product_id: body.id,
+                category_id: catId
+            }))
+
+            const { error: relError } = await serviceClient
+                .from('product_categories')
+                .insert(categoryLinks)
+
+            if (relError) {
+                console.error('Failed to update category links', relError)
+            }
+        }
+    }
+
     // Invalidate cache
     const storage = useStorage('cache')
-    const productKeys = await storage.getKeys('api:products')
+    const keys = await storage.getKeys()
+    const productKeys = keys.filter(k => k.startsWith('products_'))
     for (const key of productKeys) {
         await storage.removeItem(key)
     }

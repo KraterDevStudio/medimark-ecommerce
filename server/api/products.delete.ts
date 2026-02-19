@@ -28,7 +28,8 @@ export default defineEventHandler(async (event) => {
 
     // Invalidate cache
     const storage = useStorage('cache')
-    const productKeys = await storage.getKeys('api:products')
+    const keys = await storage.getKeys()
+    const productKeys = keys.filter(k => k.startsWith('products_'))
     for (const key of productKeys) {
         await storage.removeItem(key)
     }

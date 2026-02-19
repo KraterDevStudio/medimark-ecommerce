@@ -5,6 +5,7 @@ export interface Product {
     image: string;
     description: string;
     category: string;
+    is_archived?: boolean;
     categories?: { id: number; name: string; slug: string }[];
 }
 

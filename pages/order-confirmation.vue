@@ -11,41 +11,9 @@
       <p class="order-number">Número de Pedido: <strong>#{{ orderId }}</strong></p>
 
       <div class="confirmation-message">
-        <p>Gracias por tu compra. Hemos recibido tu pedido y te enviaremos un email de confirmación con los detalles.</p>
-        
-        <div class="payment-info">
-          <h2>Información de Pago</h2>
-          <p>Has seleccionado <strong>Transferencia Bancaria</strong> como método de pago.</p>
-          <p>Recibirás un email con los datos bancarios para completar el pago.</p>
-          
-          <div class="bank-details">
-            <h3>Datos Bancarios (Ejemplo)</h3>
-            <div class="detail-row">
-              <span class="label">Banco:</span>
-              <span class="value">Banco Ejemplo</span>
-            </div>
-            <div class="detail-row">
-              <span class="label">Titular:</span>
-              <span class="value">MediMark S.A.</span>
-            </div>
-            <div class="detail-row">
-              <span class="label">CBU:</span>
-              <span class="value">0000003100010000000000</span>
-            </div>
-            <div class="detail-row">
-              <span class="label">Alias:</span>
-              <span class="value">MEDIMARK.PAGOS</span>
-            </div>
-            <div class="detail-row">
-              <span class="label">Referencia:</span>
-              <span class="value">#{{ orderId }}</span>
-            </div>
-          </div>
+        <p>Gracias por tu orden. Hemos recibido tu pedido y nos estaremos contactando contigo a la brevedad.
+        </p>
 
-          <p class="note">
-            <strong>Importante:</strong> Incluye el número de pedido como referencia en la transferencia.
-          </p>
-        </div>
       </div>
 
       <div class="actions">
@@ -111,6 +79,7 @@ if (!route.query.orderId) {
     transform: scale(0);
     opacity: 0;
   }
+
   to {
     transform: scale(1);
     opacity: 1;
@@ -135,72 +104,28 @@ h1 {
 }
 
 .confirmation-message {
-  text-align: left;
+  text-align: center;
   margin: 2rem 0;
   padding: 2rem;
   background: #f9fafb;
   border-radius: 0.5rem;
 }
 
-.confirmation-message > p {
+.confirmation-message>p {
   margin-bottom: 1.5rem;
   line-height: 1.6;
 }
 
-.payment-info h2 {
+.custom-message {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.success-text {
   font-size: 1.25rem;
-  margin-bottom: 1rem;
-  color: var(--color-text);
-}
-
-.payment-info p {
-  margin-bottom: 1rem;
-  line-height: 1.6;
-}
-
-.bank-details {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 0.5rem;
-  margin: 1.5rem 0;
-  border: 1px solid var(--color-border);
-}
-
-.bank-details h3 {
-  font-size: 1rem;
-  margin-bottom: 1rem;
-  color: var(--color-text);
-}
-
-.detail-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid #f3f4f6;
-}
-
-.detail-row:last-child {
-  border-bottom: none;
-}
-
-.detail-row .label {
-  font-weight: 500;
-  color: #6b7280;
-}
-
-.detail-row .value {
   font-weight: 600;
-  color: var(--color-text);
-  font-family: monospace;
-}
-
-.note {
-  background: #fef3c7;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  border-left: 4px solid #f59e0b;
-  margin-top: 1.5rem;
-  font-size: 0.875rem;
+  color: var(--color-primary);
+  line-height: 1.4;
 }
 
 .actions {

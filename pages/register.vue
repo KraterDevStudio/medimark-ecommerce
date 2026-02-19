@@ -1,44 +1,26 @@
 <template>
   <div class="container register-page">
     <div class="register-card">
-      <h1>Create Account</h1>
+      <h1>Crear Cuenta</h1>
       <form @submit.prevent="handleRegister">
         <div class="form-group">
-          <label for="name">Full Name</label>
-          <input 
-            type="text" 
-            id="name" 
-            v-model="form.name" 
-            placeholder="John Doe"
-            required 
-          />
+          <label for="name">Nombre Completo</label>
+          <input type="text" id="name" v-model="form.name" placeholder="Juan Perez" required />
         </div>
         <div class="form-group">
-          <label for="email">Email Address</label>
-          <input 
-            type="email" 
-            id="email" 
-            v-model="form.email" 
-            placeholder="john@example.com"
-            required 
-          />
+          <label for="email">Correo electrónico</label>
+          <input type="email" id="email" v-model="form.email" placeholder="john@example.com" required />
         </div>
         <div class="form-group">
-          <label for="password">Password</label>
-          <input 
-            type="password" 
-            id="password" 
-            v-model="form.password" 
-            placeholder="********"
-            required 
-          />
+          <label for="password">Contraseña</label>
+          <input type="password" id="password" v-model="form.password" placeholder="********" required />
         </div>
         <p v-if="error" class="error-msg">{{ error }}</p>
         <button type="submit" class="btn btn-block" :disabled="loading">
-          {{ loading ? 'Creating Account...' : 'Register' }}
+          {{ loading ? 'Creando cuenta...' : 'Registrarse' }}
         </button>
         <p class="login-link">
-          Already have an account? <NuxtLink to="/login">Login here</NuxtLink>
+          ¿Ya tienes una cuenta? <NuxtLink to="/login">Inicia sesión aquí</NuxtLink>
         </p>
       </form>
     </div>
@@ -65,15 +47,15 @@ watchEffect(() => {
 const handleRegister = async () => {
   loading.value = true
   error.value = ''
-  
+
   try {
     await register(form)
     // Auth state change will trigger the watchEffect above
-  } catch(e: any) {
+  } catch (e: any) {
     console.log(e)
     error.value = e.message || 'Registration failed'
   }
-  
+
   loading.value = false
 }
 </script>
