@@ -50,10 +50,6 @@ export default defineEventHandler(async (event) => {
         query = query.eq('filter_categories.category.slug', category)
     }
 
-    if (search) {
-        query = query.ilike('title', `%${search}%`)
-    }
-
     // Filter archived products for non-admins
     if (!isAdmin) {
         query = query.eq('is_archived', false)
@@ -69,21 +65,28 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    // Transform result to flatten categories
-    const transformedProducts = products.map(product => {
-        const categories = (product.categories as any[]).map((pc: any) => pc.category).filter(Boolean)
-        // We'll keep the full categories array, but also a string for legacy simple display
-        const categoryString = categories.map((c: any) => c.name).join(', ')
+    const normalize = (str: string) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
 
-        // Remove the internal filter alias if present
+    // Transform result to flatten categories and apply manual search filter
+    let transformedProducts = products.map(product => {
+        const categories = (product.categories as any[]).map((pc: any) => pc.category).filter(Boolean)
+        const categoryString = categories.map((c: any) => c.name).join(', ')
         const { filter_categories, ...rest } = product as any
 
         return {
             ...rest,
             categories,
-            category: categoryString // Backward compatibility/convenience
+            category: categoryString
         }
     })
+
+    if (search) {
+        const normalizedSearch = normalize(search as string)
+        transformedProducts = transformedProducts.filter(p =>
+            normalize(p.title).includes(normalizedSearch) ||
+            normalize(p.description || '').includes(normalizedSearch)
+        )
+    }
 
     // Store in cache
     await storage.setItem(cacheKey, transformedProducts)

@@ -1,75 +1,74 @@
 <template>
-    <div class="container forgot-password-page">
-        <div class="forgot-password-card">
-            <h1>Olvidé mi contraseña</h1>
-            <p class="msg">Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.</p>
+    <div class="container reset-password-page">
+        <div class="reset-password-card">
+            <h1>Restablecer contraseña</h1>
+            <p v-if="!submitted" class="msg">Ingresa tu nueva contraseña a continuación.</p>
+
             <div v-if="submitted" class="success-state">
                 <div class="success-icon">✓</div>
-                <h2>Enlace enviado</h2>
-                <p>Revisa tu bandeja de entrada. Te hemos enviado un enlace para restablecer tu contraseña.</p>
-                <NuxtLink to="/login" class="btn btn-block">Volver al inicio de sesión</NuxtLink>
+                <h2>Contraseña actualizada</h2>
+                <p>Tu contraseña ha sido restablecida con éxito. Ya puedes iniciar sesión con tu nueva contraseña.</p>
+                <NuxtLink to="/login" class="btn btn-block">Ir al inicio de sesión</NuxtLink>
             </div>
-            <form v-else @submit.prevent="handleForgotPassword">
+
+            <form v-else @submit.prevent="handleResetPassword">
                 <div class="form-group">
-                    <label for="email">Correo electrónico</label>
-                    <input type="email" id="email" v-model="email" placeholder="Correo electrónico" required />
+                    <label for="password">Nueva contraseña</label>
+                    <input type="password" id="password" v-model="password" placeholder="Mínimo 6 caracteres" required
+                        minlength="6" />
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirmar contraseña</label>
+                    <input type="password" id="confirmPassword" v-model="confirmPassword"
+                        placeholder="Repite la contraseña" required />
                 </div>
                 <p v-if="error" class="error-msg">{{ error }}</p>
                 <button type="submit" class="btn btn-block" :disabled="loading">
-                    {{ loading ? 'Enviando...' : 'Enviar enlace' }}
+                    {{ loading ? 'Actualizando...' : 'Restablecer contraseña' }}
                 </button>
-                <p class="login-link">
-                    <NuxtLink to="/login">Volver</NuxtLink>
-                </p>
             </form>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-const email = ref('')
+const password = ref('')
+const confirmPassword = ref('')
 const loading = ref(false)
 const submitted = ref(false)
 const error = ref('')
-const { forgotPassword } = useAuth()
-const router = useRouter()
+const { resetPassword } = useAuth()
 
-const handleForgotPassword = async () => {
+const handleResetPassword = async () => {
+    if (password.value !== confirmPassword.value) {
+        error.value = 'Las contraseñas no coinciden'
+        return
+    }
+
     loading.value = true
     error.value = ''
 
     try {
-        const success = await forgotPassword(email.value)
-        if (success) {
-            submitted.value = true
-        } else {
-            error.value = 'No se pudo enviar el correo. Por favor, intenta de nuevo.'
-        }
+        await resetPassword(password.value)
+        submitted.value = true
     } catch (e: any) {
-        console.log(e)
-        error.value = e.message || 'Error al procesar la solicitud'
+        console.error(e)
+        error.value = e.message || 'No se pudo restablecer la contraseña. El enlace puede haber expirado.'
+    } finally {
+        loading.value = false
     }
-
-    loading.value = false
 }
 </script>
 
 <style scoped>
-.msg {
-    text-align: center;
-    margin-bottom: 1.5rem;
-    font-size: 0.875rem;
-    color: #6b7280;
-}
-
-.forgot-password-page {
+.reset-password-page {
     min-height: 60vh;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.forgot-password-card {
+.reset-password-card {
     background: white;
     padding: 2.5rem;
     border-radius: 1rem;
@@ -83,6 +82,13 @@ h1 {
     text-align: center;
     margin-bottom: 2rem;
     font-size: 1.5rem;
+}
+
+.msg {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-size: 0.875rem;
+    color: #6b7280;
 }
 
 .form-group {
@@ -116,22 +122,6 @@ h1 {
 
 .btn-block {
     width: 100%;
-}
-
-.login-link {
-    text-align: left;
-    margin-top: 1.5rem;
-    font-size: 0.875rem;
-    color: #6b7280;
-}
-
-.login-link a {
-    color: var(--color-accent);
-    font-weight: 600;
-}
-
-.login-link a:hover {
-    text-decoration: underline;
 }
 
 .success-state {

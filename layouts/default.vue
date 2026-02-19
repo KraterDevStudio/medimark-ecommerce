@@ -7,8 +7,8 @@
         <div class="header-actions">
           <div class="search-bar-container desktop-only">
             <div class="search-bar">
-              <input v-model="searchQuery" type="text" placeholder="Buscar productos..." @focus="isSearchFocused = true"
-                @blur="handleBlur">
+              <input :value="searchQuery" type="text" placeholder="Buscar productos..." @focus="isSearchFocused = true"
+                @blur="handleBlur" @input="e => handleSearchInput((e.target as HTMLInputElement).value)">
               <button class="search-btn">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                   <!--Boxicons v3.0.8 https://boxicons.com | License  https://docs.boxicons.com/free-->
@@ -101,8 +101,8 @@
       <div class="header-bottom mobile-only">
         <div class="search-bar-container">
           <div class="search-bar">
-            <input v-model="searchQuery" type="text" placeholder="Buscar productos..." @focus="isSearchFocused = true"
-              @blur="handleBlur">
+            <input :value="searchQuery" type="text" placeholder="Buscar productos..." @focus="isSearchFocused = true"
+              @blur="handleBlur" @input="e => handleSearchInput((e.target as HTMLInputElement).value)">
             <button class="search-btn">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                 <!--Boxicons v3.0.8 https://boxicons.com | License  https://docs.boxicons.com/free-->
@@ -286,10 +286,15 @@ const searchResults = ref<any[]>([])
 const isSearchFocused = ref(false)
 let searchTimeout: any = null
 
-watch(searchQuery, (newQuery) => {
+const normalizeString = (str: string) => {
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+const handleSearchInput = (val: string) => {
+  searchQuery.value = val
   if (searchTimeout) clearTimeout(searchTimeout)
 
-  if (!newQuery.trim()) {
+  if (!val.trim()) {
     searchResults.value = []
     return
   }
@@ -297,14 +302,14 @@ watch(searchQuery, (newQuery) => {
   searchTimeout = setTimeout(async () => {
     try {
       const data = await $fetch('/api/products', {
-        params: { search: newQuery }
+        params: { search: normalizeString(val) }
       })
       searchResults.value = data as any[]
     } catch (e) {
       console.error('Search failed:', e)
     }
-  }, 300)
-})
+  }, 200) // Slightly faster debounce
+}
 
 const handleBlur = () => {
   // Delay blur to allow clicking the link

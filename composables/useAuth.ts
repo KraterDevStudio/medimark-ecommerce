@@ -103,12 +103,62 @@ export const useAuth = () => {
     }
 
     const forgotPassword = async (email: string) => {
-        const { error } = await supabase.auth.resetPasswordForEmail(email)
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/reset-password`,
+        })
         if (error) console.error('Forgot password failed', error)
         return !error
     }
 
+    const resetPassword = async (newPassword: string) => {
+        const { error } = await supabase.auth.updateUser({
+            password: newPassword
+        })
+        if (error) {
+            console.error('Reset password failed', error)
+            throw error
+        }
+        return true
+    }
+
+    const updatePassword = async (currentPassword: string, newPassword: string) => {
+        // First verify current password by trying to sign in again
+        if (!user.value?.email) throw new Error('Usuario no autenticado')
+
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+            email: user.value.email,
+            password: currentPassword
+        })
+
+        if (signInError) {
+            throw new Error('La contraseña actual es incorrecta')
+        }
+
+        // Now update it
+        const { error: updateError } = await supabase.auth.updateUser({
+            password: newPassword
+        })
+
+        if (updateError) {
+            throw updateError
+        }
+
+        return true
+    }
+
     const isAdmin = computed(() => profile.value?.role === 'admin')
 
-    return { user, profile, isAdmin, loadingProfile, fetchProfile, login, register, logout, forgotPassword }
+    return {
+        user,
+        profile,
+        isAdmin,
+        loadingProfile,
+        fetchProfile,
+        login,
+        register,
+        logout,
+        forgotPassword,
+        resetPassword,
+        updatePassword
+    }
 }
