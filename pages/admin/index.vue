@@ -194,7 +194,7 @@ const openEditModal = (product: Product) => {
   form.id = product.id
   form.title = product.title
   form.price = product.price.toString()
-  form.categoryIds = product.categories?.map((cat: any) => cat.category.id) || []
+  form.categoryIds = product.categories?.map((cat: any) => cat.id) || []
   form.image = product.image
   form.description = product.description
   showModal.value = true

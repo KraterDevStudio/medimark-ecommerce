@@ -2,7 +2,9 @@
   <div class="layout">
     <header class="header">
       <div class="header-top">
-        <NuxtLink to="/" class="logo">MediMark</NuxtLink>
+        <NuxtLink to="/" class="logo">
+          <img src="@/assets/img/logo.png" alt="Logo" height="80" />
+        </NuxtLink>
 
         <div class="header-actions">
           <div class="search-bar-container desktop-only">
