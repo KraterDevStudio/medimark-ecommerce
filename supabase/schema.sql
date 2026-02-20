@@ -5,7 +5,7 @@
 -- 1. PRODUCTS TABLE
 -- ============================================
 CREATE TABLE products (
-  id BIGSERIAL PRIMARY KEY,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
   price NUMERIC(10, 2) NOT NULL CHECK (price >= 0),
   description TEXT,
@@ -47,7 +47,7 @@ CREATE INDEX idx_user_profiles_auth_user_id ON user_profiles(auth_user_id);
 -- 3. ORDERS TABLE
 -- ============================================
 CREATE TABLE orders (
-  id BIGSERIAL PRIMARY KEY,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   -- For registered users
   user_id BIGINT REFERENCES user_profiles(id) ON DELETE SET NULL,
   -- For guest checkout
@@ -107,7 +107,7 @@ CREATE INDEX idx_products_category_id ON products(category_id);
 -- 1.2 PRODUCT CATEGORIES (Junction Table)
 -- ============================================
 CREATE TABLE product_categories (
-  product_id BIGINT REFERENCES products(id) ON DELETE CASCADE,
+  product_id UUID REFERENCES products(id) ON DELETE CASCADE,
   category_id BIGINT REFERENCES categories(id) ON DELETE CASCADE,
   PRIMARY KEY (product_id, category_id)
 );
@@ -132,8 +132,8 @@ CREATE INDEX idx_product_categories_category ON product_categories(category_id);
 -- ============================================
 CREATE TABLE order_items (
   id BIGSERIAL PRIMARY KEY,
-  order_id BIGINT NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
-  product_id BIGINT REFERENCES products(id) ON DELETE SET NULL,
+  order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+  product_id UUID REFERENCES products(id) ON DELETE SET NULL,
   -- Store product details at time of purchase (in case product changes/deleted)
   product_title TEXT NOT NULL,
   product_price NUMERIC(10, 2) NOT NULL CHECK (product_price >= 0),
@@ -325,7 +325,7 @@ CREATE TABLE homepage_sections (
 -- Junction table for products in sections
 CREATE TABLE homepage_section_products (
   section_id BIGINT REFERENCES homepage_sections(id) ON DELETE CASCADE,
-  product_id BIGINT REFERENCES products(id) ON DELETE CASCADE,
+  product_id UUID REFERENCES products(id) ON DELETE CASCADE,
   display_order INTEGER DEFAULT 0,
   PRIMARY KEY (section_id, product_id)
 );

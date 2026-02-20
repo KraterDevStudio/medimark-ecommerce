@@ -107,9 +107,9 @@ button {
 
 /*spinner class with spin animation */
 .spinner {
-  width: 2rem;
-  height: 2rem;
-  border: 0.25rem solid var(--color-border);
+  width: 4rem;
+  height: 4rem;
+  border: 0.50rem solid var(--color-border);
   border-top-color: var(--color-primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;

@@ -22,7 +22,9 @@
       </div>
 
       <nav class="admin-nav">
-        <NuxtLink to="/admin" exact-active-class="active" @click="isSidebarOpen = false">Productos</NuxtLink>
+        <NuxtLink to="/admin" exact-active-class="active" @click="isSidebarOpen = false">Resumen
+        </NuxtLink>
+        <NuxtLink to="/admin/products" exact-active-class="active" @click="isSidebarOpen = false">Productos</NuxtLink>
         <NuxtLink to="/admin/categories" exact-active-class="active" @click="isSidebarOpen = false">Categorías
         </NuxtLink>
         <NuxtLink to="/admin/orders" exact-active-class="active" @click="isSidebarOpen = false">Órdenes</NuxtLink>
@@ -74,12 +76,12 @@ onMounted(() => {
 })
 
 const pageTitle = computed(() => {
-  if (route.path === '/admin/create') return 'Agregar Producto'
+  if (route.path === '/admin/products') return 'Gestión de Productos'
   if (route.path.includes('/admin/edit')) return 'Editar Producto'
   if (route.path === '/admin/orders') return 'Gestionar Ordenes'
   if (route.path === '/admin/categories') return 'Gestionar Categorías'
   if (route.path === '/admin/content') return 'Gestionar Contenido'
-  return 'Panel de Productos'
+  return 'Resumen'
 })
 </script>
 

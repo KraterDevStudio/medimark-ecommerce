@@ -1,7 +1,9 @@
 <template>
   <div class="product-card">
     <div class="image-wrapper">
-      <img :src="product.image" :alt="product.title" loading="lazy" />
+      <NuxtLink :to="`/products/${product.id}`">
+        <img :src="product.image" :alt="product.title" loading="lazy" />
+      </NuxtLink>
     </div>
     <div class="content">
       <h3 class="title">
@@ -60,6 +62,7 @@ const quantity = computed(() => getItemQuantity(props.product.id))
   overflow: hidden;
   background-color: var(--color-surface);
   position: relative;
+  cursor: pointer;
 }
 
 .image-wrapper img {

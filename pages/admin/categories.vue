@@ -1,7 +1,7 @@
 <template>
   <div class="admin-categories">
     <div class="header-actions">
-      <button @click="openCreateModal(null)" class="btn-primary btn-action-mobile">Agregar Nueva Categoría</button>
+      <button @click="openCreateModal(null)" class="btn btn-action-mobile">+ Nueva Categoría</button>
     </div>
 
     <div class="categories-list">
@@ -20,22 +20,26 @@
       </div>
     </div>
 
+    <div class="info-total" v-if="!loading">
+      <p>Total de categorías: {{ categories?.length }}</p>
+    </div>
+
     <!-- Create/Edit Modal -->
     <div v-if="showModal" class="modal-overlay" @click="closeModal">
       <div class="modal-content" @click.stop>
         <header class="modal-header">
-          <h3>{{ isEditing ? 'Edit Category' : 'Add Category' }}</h3>
+          <h3>{{ isEditing ? 'Editar Categoría' : 'Nueva Categoría' }}</h3>
           <button class="close-btn" @click="closeModal">&times;</button>
         </header>
 
         <form @submit.prevent="saveCategory" class="modal-body">
           <div class="form-group">
-            <label>Name</label>
-            <input v-model="form.name" type="text" required placeholder="e.g. Electronics" />
+            <label>Nombre</label>
+            <input v-model="form.name" type="text" required placeholder="Categoría" />
           </div>
 
           <div class="form-group">
-            <label>Parent Category</label>
+            <label>Categoría Padre</label>
             <select v-model="form.parent_id">
               <option :value="null">None (Top Level)</option>
               <template v-for="cat in flatCategories" :key="cat.id">
@@ -47,13 +51,13 @@
           </div>
 
           <div class="form-group">
-            <label>Image URL (Optional)</label>
+            <label>URL de la Imagen (Opcional)</label>
             <input v-model="form.image" type="text" placeholder="https://..." />
           </div>
 
           <div class="modal-actions">
-            <button type="button" @click="closeModal" class="btn-secondary">Cancel</button>
-            <button type="submit" class="btn-primary">{{ isEditing ? 'Update' : 'Create' }}</button>
+            <button type="button" @click="closeModal" class="btn-secondary">Cancelar</button>
+            <button type="submit" class="btn-primary">{{ isEditing ? 'Actualizar' : 'Crear' }}</button>
           </div>
         </form>
       </div>
@@ -202,6 +206,16 @@ const CategoryItem = defineComponent({
 </script>
 
 <style scoped>
+.info-total {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  margin-top: 2rem;
+  color: #404040;
+}
+
 .loading {
   display: flex;
   justify-content: center;

@@ -1,5 +1,5 @@
 export interface Product {
-    id: number;
+    id: string;
     title: string;
     price: number;
     image: string;
@@ -26,7 +26,7 @@ export const useCart = () => {
         storeCart()
     }
 
-    const removeFromCart = (id: number) => {
+    const removeFromCart = (id: string) => {
         items.value = items.value.filter((i: CartItem) => i.id !== id)
         storeCart()
     }
@@ -36,7 +36,7 @@ export const useCart = () => {
         localStorage.setItem('cart', JSON.stringify(items.value))
     }
 
-    const updateQuantity = (id: number, quantity: number) => {
+    const updateQuantity = (id: string, quantity: number) => {
         const item = items.value.find((i: CartItem) => i.id === id)
         if (item) {
             if (quantity <= 0) {
@@ -79,7 +79,7 @@ export const useCart = () => {
         }
     }
 
-    const getItemQuantity = (id: number) => {
+    const getItemQuantity = (id: string) => {
         return items.value.find((i: CartItem) => i.id === id)?.quantity || 0
     }
 

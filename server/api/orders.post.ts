@@ -159,7 +159,6 @@ export default defineEventHandler(async (event) => {
                     <p><strong>Nombre:</strong> ${customerInfo.name}</p>
                     <p><strong>Email:</strong> ${customerInfo.email}</p>
                     <p><strong>Teléfono:</strong> ${customerInfo.phone}</p>
-                    <p><strong>Dirección:</strong> ${customerInfo.address}, ${customerInfo.city}, ${customerInfo.province} (${customerInfo.postalCode})</p>
                     
                     <h3>Productos</h3>
                     <table style="width: 100%; border-collapse: collapse;">

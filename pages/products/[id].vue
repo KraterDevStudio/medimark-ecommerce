@@ -1,5 +1,5 @@
 <template>
-  <div v-if="product" class="container product-detail">
+  <div v-if="product && !pending" class="container product-detail">
     <div class="product-grid-layout">
       <div class="image-gallery">
         <img :src="product.image" :alt="product.title" class="main-image" />
@@ -14,23 +14,39 @@
         <h1 class="title">{{ product.title }}</h1>
         <p class="price">{{ formatPrice(product.price) }}</p>
         <p class="description">{{ product.description }}</p>
-        
+
         <div class="actions">
-          <button class="btn btn-lg" @click="addToCart(product)">Add to Cart</button>
+          <div v-if="quantity > 0" class="quantity-selector">
+            <button class="btn-qty" @click="updateQuantity(product.id, quantity - 1)">-</button>
+            <span class="quantity-value">{{ quantity }}</span>
+            <button class="btn-qty" @click="updateQuantity(product.id, quantity + 1)">+</button>
+          </div>
+          <button v-else class="btn btn-lg" @click="addToCart(product)">Agregar al carrito</button>
         </div>
       </div>
     </div>
   </div>
-  <div v-else class="container loading">Loading...</div>
+  <div v-if="!product && !pending">
+    <div class="container">
+      <h1>Ups! No se encontró el producto</h1>
+      <p>Quizás puedas encontrar lo que buscas en nuestra página principal</p>
+      <NuxtLink to="/" class="btn btn-lg">Volver al inicio</NuxtLink>
+    </div>
+  </div>
+  <div v-if="pending" class="container loading">
+    <div class="spinner"></div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import type { Product } from '~/composables/useCart'
 
 const route = useRoute()
-const { data: products } = await useFetch<Product[]>('/api/products')
-const product = computed(() => products.value?.find(p => p.id === Number(route.params.id)))
-const { addToCart, formatPrice } = useCart()
+const { data: products, pending } = await useLazyFetch<Product[]>('/api/products')
+const product = computed(() => products.value?.find(p => p.id === route.params.id))
+const { addToCart, formatPrice, updateQuantity, getItemQuantity } = useCart()
+
+const quantity = computed(() => product.value ? getItemQuantity(product.value.id) : 0)
 
 useHead({
   title: computed(() => product.value ? `${product.value.title} - MediMark` : 'Loading...')
@@ -38,6 +54,13 @@ useHead({
 </script>
 
 <style scoped>
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 500px;
+}
+
 .product-detail {
   padding-top: 4rem;
 }
@@ -101,5 +124,46 @@ useHead({
   padding: 1rem 2rem;
   font-size: 1.125rem;
   width: 100%;
+}
+
+.quantity-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  background: var(--color-surface);
+  border-radius: 2rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-border);
+  width: 100%;
+}
+
+.btn-qty {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: none;
+  background: white;
+  color: var(--color-text);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s;
+}
+
+.btn-qty:hover {
+  background: var(--color-accent);
+  color: white;
+}
+
+.quantity-value {
+  font-weight: 600;
+  font-size: 1.25rem;
+  min-width: 2rem;
+  text-align: center;
 }
 </style>

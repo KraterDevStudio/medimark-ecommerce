@@ -20,7 +20,7 @@
         </thead>
         <tbody>
           <tr v-for="order in orders" :key="order.id" @click="openOrder(order)" class="order-row">
-            <td>#{{ order.id }}</td>
+            <td>#{{ order.id.substring(0, 8) + '...' }}</td>
             <td>
               <div class="customer-info">
                 <span class="name">{{ order.customerInfo.name }}</span>
@@ -45,6 +45,10 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <div v-if="!pending" class="info-total">
+      <p>Total de órdenes: {{ orders?.length }}</p>
     </div>
 
     <!-- Order Details Modal -->
@@ -222,7 +226,7 @@ definePageMeta({
 })
 
 interface Order {
-  id: number
+  id: string
   date: string
   total: number
   status: string
@@ -237,7 +241,7 @@ interface Order {
     postalCode: string
   }
   items: Array<{
-    id: number
+    id: string
     title: string
     price: number
     image: string
@@ -246,7 +250,7 @@ interface Order {
 }
 
 interface Product {
-  id: number
+  id: string
   title: string
   price: number
   image: string
@@ -313,7 +317,7 @@ const closeCreateModal = () => {
 const addProduct = () => {
   if (!selectedProductId.value) return
 
-  const product = allProducts.value?.find((p: any) => p.id === parseInt(selectedProductId.value))
+  const product = allProducts.value?.find((p: any) => p.id === selectedProductId.value)
   if (!product) return
 
   const existingItem = orderForm.items.find((item: any) => item.id === product.id)
@@ -334,7 +338,7 @@ const addProduct = () => {
   selectedProductQuantity.value = 1
 }
 
-const removeProduct = (id: number) => {
+const removeProduct = (id: string) => {
   orderForm.items = orderForm.items.filter(item => item.id !== id)
   calculateTotal()
 }
@@ -374,7 +378,7 @@ const closeOrder = () => {
   selectedOrder.value = null
 }
 
-const updateStatus = async (id: number, newStatus: string) => {
+const updateStatus = async (id: string, newStatus: string) => {
   try {
     await $fetch('/api/orders', {
       method: 'PUT',
@@ -409,6 +413,16 @@ const getStatusClass = (status: string) => {
 </script>
 
 <style scoped>
+.info-total {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  margin-top: 2rem;
+  color: #404040;
+}
+
 .loading {
   display: flex;
   justify-content: center;

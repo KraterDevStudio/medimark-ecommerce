@@ -27,8 +27,11 @@
                 @mousedown.prevent>
                 <NuxtLink v-for="product in searchResults" :key="product.id" :to="`/products/${product.id}`"
                   class="search-result-item" @click="clearSearch">
-                  <img :src="product.image" :alt="product.title" class="result-thumb" />
-                  <div class="result-info">
+                  <div v-if="isSearchLoading" class="search-loading">
+                    <div class="spinner"></div>
+                  </div>
+                  <img v-else :src="product.image" :alt="product.title" class="result-thumb" />
+                  <div v-if="!isSearchLoading" class="result-info">
                     <span class="result-title">{{ product.title }}</span>
                     <span class="result-price">{{ formatPrice(product.price) }}</span>
                   </div>
@@ -216,7 +219,7 @@
           <NuxtLink to="/">
             <h3>MediMark</h3>
           </NuxtLink>
-          <NuxtLink to="/">Preguntas frecuentes (FAQ)</NuxtLink>
+          <NuxtLink to="/faq">Preguntas frecuentes (FAQ)</NuxtLink>
         </div>
         <div class="footer-col">
           <h3>Enlaces</h3>
@@ -240,12 +243,12 @@
           <ul>
             <!-- Instagram icon   -->
             <li>
-              <a href="https://www.instagram.com/medimark/" target="_blank">
+              <a href="https://www.instagram.com/medimarkpapeleria/" target="_blank">
                 Instagram
               </a>
             </li>
             <li>
-              medimark@medimark.com
+              papeleriamedimark@gmail.com
             </li>
 
           </ul>
@@ -286,6 +289,7 @@ const isMobileMenuOpen = ref(false)
 const searchQuery = ref('')
 const searchResults = ref<any[]>([])
 const isSearchFocused = ref(false)
+const isSearchLoading = ref(false)
 let searchTimeout: any = null
 
 const normalizeString = (str: string) => {
@@ -303,9 +307,13 @@ const handleSearchInput = (val: string) => {
 
   searchTimeout = setTimeout(async () => {
     try {
+      // add loading state
+      isSearchLoading.value = true
       const data = await $fetch('/api/products', {
         params: { search: normalizeString(val) }
       })
+      isSearchLoading.value = false
+
       searchResults.value = data as any[]
     } catch (e) {
       console.error('Search failed:', e)
