@@ -66,7 +66,18 @@
                 </NuxtLink>
               </li>
               <li class="desktop-only">
-                <NuxtLink v-if="isAdmin" to="/admin">Admin</NuxtLink>
+                <NuxtLink v-if="isAdmin" to="/admin">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
+                    viewBox="0 0 24 24">
+                    <!--Boxicons v3.0.8 https://boxicons.com | License  https://docs.boxicons.com/free-->
+                    <path
+                      d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4m0 6c-1.08 0-2-.92-2-2s.92-2 2-2 2 .92 2 2-.92 2-2 2">
+                    </path>
+                    <path
+                      d="m20.42 13.4-.51-.29c.05-.37.08-.74.08-1.11s-.03-.74-.08-1.11l.51-.29c.96-.55 1.28-1.78.73-2.73l-1-1.73a2.006 2.006 0 0 0-2.73-.73l-.53.31c-.58-.46-1.22-.83-1.9-1.11v-.6c0-1.1-.9-2-2-2h-2c-1.1 0-2 .9-2 2v.6c-.67.28-1.31.66-1.9 1.11l-.53-.31c-.96-.55-2.18-.22-2.73.73l-1 1.73c-.55.96-.22 2.18.73 2.73l.51.29c-.05.37-.08.74-.08 1.11s.03.74.08 1.11l-.51.29c-.96.55-1.28 1.78-.73 2.73l1 1.73c.55.95 1.77 1.28 2.73.73l.53-.31c.58.46 1.22.83 1.9 1.11v.6c0 1.1.9 2 2 2h2c1.1 0 2-.9 2-2v-.6a8.7 8.7 0 0 0 1.9-1.11l.53.31c.95.55 2.18.22 2.73-.73l1-1.73c.55-.96.22-2.18-.73-2.73m-2.59-2.78c.11.45.17.92.17 1.38s-.06.92-.17 1.38a1 1 0 0 0 .47 1.11l1.12.65-1 1.73-1.14-.66c-.38-.22-.87-.16-1.19.14-.68.65-1.51 1.13-2.38 1.4-.42.13-.71.52-.71.96v1.3h-2v-1.3c0-.44-.29-.83-.71-.96-.88-.27-1.7-.75-2.38-1.4a1.01 1.01 0 0 0-1.19-.15l-1.14.66-1-1.73 1.12-.65c.39-.22.58-.68.47-1.11-.11-.45-.17-.92-.17-1.38s.06-.93.17-1.38A1 1 0 0 0 5.7 9.5l-1.12-.65 1-1.73 1.14.66c.38.22.87.16 1.19-.14.68-.65 1.51-1.13 2.38-1.4.42-.13.71-.52.71-.96v-1.3h2v1.3c0 .44.29.83.71.96.88.27 1.7.75 2.38 1.4.32.31.81.36 1.19.14l1.14-.66 1 1.73-1.12.65c-.39.22-.58.68-.47 1.11Z">
+                    </path>
+                  </svg>
+                </NuxtLink>
                 <NuxtLink v-else-if="user" to="/account/orders">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
                     viewBox="0 0 24 24">
@@ -91,6 +102,24 @@
                     </path>
                   </svg>
                 </NuxtLink>
+              </li>
+              <li>
+                <button class="theme-toggle" @click="toggleTheme" title="Cambiar tema">
+                  <svg v-if="theme === 'light'" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                    fill="currentColor" viewBox="0 0 24 24">
+                    <!--Boxicons v3.0.8 https://boxicons.com | License  https://docs.boxicons.com/free-->
+                    <path
+                      d="M12 17.01c2.76 0 5.01-2.25 5.01-5.01S14.76 6.99 12 6.99 6.99 9.24 6.99 12s2.25 5.01 5.01 5.01M12 9c1.66 0 3.01 1.35 3.01 3.01s-1.35 3.01-3.01 3.01-3.01-1.35-3.01-3.01S10.34 9 12 9m1 10h-2v3h2zm0-17h-2v3h2zM2 11h3v2H2zm17 0h3v2h-3zM4.22 18.36l.71.71.71.71 1.06-1.06 1.06-1.06-.71-.71-.71-.71-1.06 1.06zM19.78 5.64l-.71-.71-.71-.71-1.06 1.06-1.06 1.06.71.71.71.71 1.06-1.06zm-12.02.7L6.7 5.28 5.64 4.22l-.71.71-.71.71L5.28 6.7l1.06 1.06.71-.71zm8.48 11.32 1.06 1.06 1.06 1.06.71-.71.71-.71-1.06-1.06-1.06-1.06-.71.71z">
+                    </path>
+                  </svg>
+                  <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
+                    viewBox="0 0 24 24">
+                    <!--Boxicons v3.0.8 https://boxicons.com | License  https://docs.boxicons.com/free-->
+                    <path
+                      d="M12.2 22c4.53 0 8.45-2.91 9.76-7.24a1.002 1.002 0 0 0-1.25-1.25c-.78.23-1.58.35-2.38.35-4.52 0-8.2-3.68-8.2-8.2 0-.8.12-1.6.35-2.38.11-.35.01-.74-.25-1s-.64-.36-1-.25A10.17 10.17 0 0 0 2 11.8C2 17.42 6.57 22 12.2 22M8.18 4.65c-.03.34-.05.68-.05 1.02 0 5.62 4.57 10.2 10.2 10.2.34 0 .68-.02 1.02-.05C17.93 18.38 15.23 20 12.2 20 7.68 20 4 16.32 4 11.8a8.15 8.15 0 0 1 4.18-7.15">
+                    </path>
+                  </svg>
+                </button>
               </li>
             </ul>
           </nav>
@@ -138,16 +167,22 @@
       <div class="category-nav desktop-only">
         <ul class="cat-list">
           <li class="cat-item">
-            <NuxtLink to="/category" class="cat-link">Productos</NuxtLink>
+            <NuxtLink to="/products/sale" class="cat-link sale-red-and-hover">OFERTAS</NuxtLink>
+          </li>
+          <li class="cat-item">
+            <NuxtLink to="/products" class="cat-link">Productos</NuxtLink>
+          </li>
+          <li class="cat-item">
+            <NuxtLink to="/products/collections" class="cat-link">Colecciones</NuxtLink>
           </li>
           <li v-for="category in categories" :key="category.id" class="cat-item">
-            <NuxtLink :to="`/category/${category.slug}`" class="cat-link">
+            <NuxtLink :to="`/products/${category.slug}`" class="cat-link">
               {{ category.name }}
               <span v-if="category.children && category.children.length" class="arrow">▾</span>
             </NuxtLink>
 
             <div v-if="category.children && category.children.length" class="cat-dropdown">
-              <NuxtLink v-for="child in category.children" :key="child.id" :to="`/category/${child.slug}`"
+              <NuxtLink v-for="child in category.children" :key="child.id" :to="`/products/${child.slug}`"
                 class="sub-cat-link">
                 {{ child.name }}
               </NuxtLink>
@@ -188,15 +223,19 @@
               <h3>Categorías</h3>
               <ul class="mobile-cat-list">
                 <li>
-                  <NuxtLink to="/category" @click="isMobileMenuOpen = false">Todos los Productos</NuxtLink>
+                  <NuxtLink to="/products/sale" @click="isMobileMenuOpen = false" class="sale-red-and-hover">OFERTAS
+                  </NuxtLink>
+                </li>
+                <li>
+                  <NuxtLink to="/products" @click="isMobileMenuOpen = false">Todos los Productos</NuxtLink>
                 </li>
                 <li v-for="category in categories" :key="category.id">
-                  <NuxtLink :to="`/category/${category.slug}`" @click="isMobileMenuOpen = false">
+                  <NuxtLink :to="`/products/${category.slug}`" @click="isMobileMenuOpen = false">
                     {{ category.name }}
                   </NuxtLink>
                   <ul v-if="category.children && category.children.length" class="mobile-sub-cats">
                     <li v-for="child in category.children" :key="child.id">
-                      <NuxtLink :to="`/category/${child.slug}`" @click="isMobileMenuOpen = false">
+                      <NuxtLink :to="`/products/${child.slug}`" @click="isMobileMenuOpen = false">
                         {{ child.name }}
                       </NuxtLink>
                     </li>
@@ -228,7 +267,7 @@
               <NuxtLink to="/">Inicio</NuxtLink>
             </li>
             <li>
-              <NuxtLink to="/category">Categorías</NuxtLink>
+              <NuxtLink to="/products">Productos</NuxtLink>
             </li>
             <li>
               <NuxtLink to="/cart">Carrito</NuxtLink>
@@ -267,12 +306,13 @@
 
 <script setup lang="ts">
 
-import { useCart } from '~/composables/useCart'
-import { useAuth } from '~/composables/useAuth'
-
-const { items: cart } = useCart()
-const { formatPrice } = useCart()
+const { items: cart, formatPrice } = useCart()
 const { user, isAdmin, logout } = useAuth()
+const { theme, toggleTheme, initTheme } = useTheme()
+
+onMounted(() => {
+  initTheme()
+})
 
 interface Category {
   id: number
@@ -363,7 +403,7 @@ const { data: categories } = await useFetch<Category[]>('/api/categories')
 }
 
 .header {
-  background-color: white;
+  background-color: var(--color-header-bg);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   position: sticky;
   top: 0;
@@ -411,11 +451,19 @@ const { data: categories } = await useFetch<Category[]>('/api/categories')
 .search-bar input {
   width: 100%;
   padding: 0.5rem 1rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--color-input-border);
+  background-color: var(--color-text-input);
+  color: var(--color-text);
   border-radius: 0.5rem 0 0 0.5rem;
   outline: none;
   font-size: 0.875rem;
+  transition: background-color 0.2s, border-color 0.2s;
 }
+
+.search-bar input:hover {
+  background-color: var(--color-input-hover);
+}
+
 
 .search-bar input:focus {
   border-color: var(--color-primary);
@@ -437,6 +485,7 @@ const { data: categories } = await useFetch<Category[]>('/api/categories')
   position: relative;
   flex: 1;
   max-width: 500px;
+  max-width: 500px;
   width: 100%;
 }
 
@@ -445,7 +494,7 @@ const { data: categories } = await useFetch<Category[]>('/api/categories')
   top: 100%;
   left: 0;
   right: 0;
-  background-color: white;
+  background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-top: none;
   border-radius: 0 0 0.5rem 0.5rem;
@@ -463,7 +512,7 @@ const { data: categories } = await useFetch<Category[]>('/api/categories')
   text-decoration: none;
   color: inherit;
   transition: background-color 0.2s;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .search-result-item:last-child {
@@ -471,7 +520,7 @@ const { data: categories } = await useFetch<Category[]>('/api/categories')
 }
 
 .search-result-item:hover {
-  background-color: #f9fafb;
+  background-color: var(--color-input-hover);
 }
 
 .result-thumb {
@@ -489,7 +538,7 @@ const { data: categories } = await useFetch<Category[]>('/api/categories')
 .result-title {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #111827;
+  color: var(--color-text);
 }
 
 .result-price {
@@ -507,7 +556,7 @@ const { data: categories } = await useFetch<Category[]>('/api/categories')
 
 .nav-links a {
   text-decoration: none;
-  color: #4b5563;
+  color: var(--color-nav-icons);
   font-weight: 500;
   transition: color 0.2s;
   white-space: nowrap;
@@ -544,8 +593,8 @@ const { data: categories } = await useFetch<Category[]>('/api/categories')
 
 /* Category Navigation (Desktop) */
 .category-nav {
-  border-top: 1px solid #f3f4f6;
-  background-color: white;
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-header-bg);
 }
 
 .cat-list {
@@ -565,15 +614,15 @@ const { data: categories } = await useFetch<Category[]>('/api/categories')
 .cat-link {
   display: block;
   padding: 0.75rem 1.25rem;
-  color: #374151;
+  color: var(--color-text);
   text-decoration: none;
   font-weight: 500;
   font-size: 0.9rem;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, color 0.2s;
 }
 
 .cat-link:hover {
-  background-color: #f9fafb;
+  background-color: var(--color-input-hover);
   color: var(--color-primary);
 }
 
@@ -582,10 +631,10 @@ const { data: categories } = await useFetch<Category[]>('/api/categories')
   position: absolute;
   top: 100%;
   left: 0;
-  background-color: white;
+  background-color: var(--color-header-bg);
   min-width: 200px;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  border: 1px solid #f3f4f6;
+  border: 1px solid var(--color-border);
   z-index: 60;
   padding: 0.5rem 0;
 }
@@ -597,13 +646,14 @@ const { data: categories } = await useFetch<Category[]>('/api/categories')
 .sub-cat-link {
   display: block;
   padding: 0.5rem 1.5rem;
-  color: #4b5563;
+  color: var(--color-text);
   text-decoration: none;
   font-size: 0.875rem;
+  transition: background-color 0.2s;
 }
 
 .sub-cat-link:hover {
-  background-color: #f3f4f6;
+  background-color: var(--color-input-hover);
 }
 
 /* Mobile Toggle */
@@ -613,8 +663,37 @@ const { data: categories } = await useFetch<Category[]>('/api/categories')
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
+  color: var(--color-text);
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s;
+}
+
+.mobile-menu-toggle:hover {
+  background-color: var(--color-input-hover);
+}
+
+.theme-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
   color: #4b5563;
   padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s, transform 0.2s;
+  border-radius: 50%;
+}
+
+.theme-toggle:hover {
+  color: var(--color-primary);
+  background-color: var(--color-surface);
+  transform: rotate(15deg);
+}
+
+[data-theme='dark'] .theme-toggle {
+  color: #fbbf24;
 }
 
 /* Mobile Search Row */
@@ -646,7 +725,7 @@ const { data: categories } = await useFetch<Category[]>('/api/categories')
 }
 
 .mobile-menu-content {
-  background: white;
+  background: var(--color-bg);
   width: 80%;
   max-width: 300px;
   height: 100%;
@@ -662,7 +741,8 @@ const { data: categories } = await useFetch<Category[]>('/api/categories')
 .mobile-menu-section h3 {
   font-size: 0.75rem;
   text-transform: uppercase;
-  color: #9ca3af;
+  color: var(--color-text);
+  opacity: 0.7;
   margin-bottom: 1rem;
   letter-spacing: 0.1em;
 }
@@ -682,7 +762,7 @@ const { data: categories } = await useFetch<Category[]>('/api/categories')
 .mobile-nav-links a,
 .mobile-cat-list a {
   text-decoration: none;
-  color: #374151;
+  color: var(--color-text);
   font-weight: 500;
   font-size: 1.125rem;
 }
@@ -719,6 +799,7 @@ const { data: categories } = await useFetch<Category[]>('/api/categories')
 
   .header-actions {
     gap: 1rem;
+    color: var(--color-primary);
   }
 
   .header-top {
@@ -732,17 +813,22 @@ const { data: categories } = await useFetch<Category[]>('/api/categories')
 
 .main {
   flex: 1;
-  background-color: #f9fafb;
+  background-color: var(--color-bg);
 }
 
 .footer {
   text-align: center;
-  padding: 5em 2em 1em 2em;
-  background-color: white;
-  width: 90%;
+  padding: 5em 8em 1em 8em;
+  background-color: var(--color-footer-bg);
+  width: 100%;
   margin: 0 auto;
   border-top: 1px solid var(--color-border);
   color: #6b7280;
+
+  @media(max-width:768px) {
+    padding: 5em 2em 1em 2em;
+
+  }
 }
 
 /* Transitions */

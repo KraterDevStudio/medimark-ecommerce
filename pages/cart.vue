@@ -13,15 +13,15 @@
           <img :src="item.image" :alt="item.title" class="item-image" />
           <div class="item-details">
             <h3>{{ item.title }}</h3>
-            <p class="price">{{ formatPrice(item.price) }}</p>
+            <p class="price">
+              <span v-if="getEffectivePrice(item) < item.price" class="original-price">{{ formatPrice(item.price)
+                }}</span>
+              {{ formatPrice(getEffectivePrice(item)) }}
+            </p>
           </div>
           <div class="item-actions">
-            <input 
-              type="number" 
-              min="1" 
-              :value="item.quantity" 
-              @change="updateQuantity(item.id, Number(($event.target as HTMLInputElement).value))"
-            />
+            <input type="number" min="1" :value="item.quantity"
+              @change="updateQuantity(item.id, Number(($event.target as HTMLInputElement).value))" />
             <button @click="removeFromCart(item.id)" class="remove-btn">Eliminar</button>
           </div>
         </div>
@@ -47,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-const { items, removeFromCart, updateQuantity, clearCart, total, formatPrice } = useCart()
+const { items, removeFromCart, updateQuantity, clearCart, total, formatPrice, getEffectivePrice } = useCart()
 const router = useRouter()
 
 const checkout = () => {
@@ -126,6 +126,13 @@ h1 {
 .item-details .price {
   color: var(--color-primary);
   font-weight: 600;
+}
+
+.original-price {
+  text-decoration: line-through;
+  color: #9ca3af;
+  font-size: 0.875rem;
+  margin-right: 0.5rem;
 }
 
 .item-actions {

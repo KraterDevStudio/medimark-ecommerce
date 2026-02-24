@@ -2,6 +2,10 @@
   <div v-if="product && !pending" class="container product-detail">
     <div class="product-grid-layout">
       <div class="image-gallery">
+        <span class="floating-badge-sale"
+          v-if="(product.discount_percentage && getEffectivePrice(product) < product.price) || (product.is_collection && getOriginalPrice(product) > getEffectivePrice(product))">
+          {{ getDisplayDiscount(product) }}% OFF
+        </span>
         <img :src="product.image" :alt="product.title" class="main-image" />
       </div>
       <div class="product-info">
@@ -12,8 +16,32 @@
           <span v-if="!product.categories || product.categories.length === 0">{{ product.category }}</span>
         </span>
         <h1 class="title">{{ product.title }}</h1>
-        <p class="price">{{ formatPrice(product.price) }}</p>
+        <div class="price-container">
+          <span v-if="getOriginalPrice(product) > getEffectivePrice(product)" class="original-price">{{
+            formatPrice(getOriginalPrice(product)) }}</span>
+          <span class="price" :class="{ 'has-discount': getOriginalPrice(product) > getEffectivePrice(product) }">{{
+            formatPrice(getEffectivePrice(product)) }}</span>
+
+        </div>
         <p class="description">{{ product.description }}</p>
+
+        <div v-if="product.is_collection && product.collection_items && product.collection_items.length > 0"
+          class="collection-items">
+          <h3>Esta colección incluye:</h3>
+          <ul>
+            <li v-for="item in product.collection_items" :key="item.id">
+              <div class="collection-item">
+                <img :src="item.image" :alt="item.title" />
+                <div class="ci-details">
+                  <span class="ci-title">{{ item.title }}</span>
+                  <span class="ci-price">{{ formatPrice(item.price || 0) }}</span>
+                </div>
+              </div>
+            </li>
+          </ul>
+          <p class="savings"> Comprando esta colección ahorrás {{ formatPrice(getOriginalPrice(product) -
+            getEffectivePrice(product)) }}</p>
+        </div>
 
         <div class="actions">
           <div v-if="quantity > 0" class="quantity-selector">
@@ -44,9 +72,17 @@ import type { Product } from '~/composables/useCart'
 const route = useRoute()
 const { data: products, pending } = await useLazyFetch<Product[]>('/api/products')
 const product = computed(() => products.value?.find(p => p.id === route.params.id))
-const { addToCart, formatPrice, updateQuantity, getItemQuantity } = useCart()
+const { addToCart, formatPrice, updateQuantity, getItemQuantity, getEffectivePrice, getOriginalPrice } = useCart()
 
 const quantity = computed(() => product.value ? getItemQuantity(product.value.id) : 0)
+
+const getDisplayDiscount = (product: Product) => {
+  if (product.discount_percentage && getEffectivePrice(product) < product.price) return product.discount_percentage;
+  if (product.is_collection && getOriginalPrice(product) > getEffectivePrice(product)) {
+    return Math.round((1 - (getEffectivePrice(product) / getOriginalPrice(product))) * 100);
+  }
+  return 0;
+}
 
 useHead({
   title: computed(() => product.value ? `${product.value.title} - MediMark` : 'Loading...')
@@ -54,6 +90,29 @@ useHead({
 </script>
 
 <style scoped>
+.savings {
+  margin-top: 1rem;
+  color: var(--color-red-sale);
+  font-weight: 600;
+}
+
+.image-gallery {
+  position: relative;
+}
+
+.floating-badge-sale {
+  position: absolute;
+  z-index: 999;
+  top: 1rem;
+  left: 1rem;
+  background: var(--color-red-sale);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
 .loading {
   display: flex;
   justify-content: center;
@@ -62,7 +121,10 @@ useHead({
 }
 
 .product-detail {
-  padding-top: 4rem;
+  min-height: 80vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .product-grid-layout {
@@ -109,15 +171,92 @@ useHead({
 .price {
   font-size: 1.5rem;
   font-weight: 700;
-  margin-bottom: 2rem;
   color: var(--color-text);
+}
+
+.has-discount {
+  color: var(--color-red-sale);
+}
+
+.price-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.original-price {
+  text-decoration: line-through;
+  color: #9ca3af;
+  font-size: 1.25rem;
+}
+
+.badge-sale {
+  color: var(--color-red-sale);
+  font-size: 1rem;
+  font-weight: 600;
+  width: 100%;
 }
 
 .description {
   font-size: 1.125rem;
   color: #4b5563;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
   line-height: 1.7;
+}
+
+.collection-items {
+  margin-bottom: 3rem;
+  background: var(--color-surface);
+  padding: 1.5rem;
+  border-radius: 1rem;
+  border: 1px solid var(--color-border);
+}
+
+.collection-items h3 {
+  font-size: 1.125rem;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.collection-items ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.collection-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.collection-item img {
+  width: 48px;
+  height: 48px;
+  border-radius: 0.5rem;
+  object-fit: cover;
+  background: white;
+}
+
+.ci-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.ci-title {
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.ci-price {
+  font-size: 0.875rem;
+  color: #6b7280;
 }
 
 .btn-lg {

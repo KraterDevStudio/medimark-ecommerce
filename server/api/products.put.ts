@@ -35,7 +35,11 @@ export default defineEventHandler(async (event) => {
             price: Number(body.price),
             description: body.description,
             image: body.image,
-            is_archived: body.is_archived
+            is_archived: body.is_archived,
+            discount_percentage: body.discount_percentage !== undefined ? Number(body.discount_percentage) : undefined,
+            sale_start_date: body.sale_start_date !== undefined ? body.sale_start_date : undefined,
+            sale_end_date: body.sale_end_date !== undefined ? body.sale_end_date : undefined,
+            is_collection: body.is_collection
         })
         .eq('id', body.id)
         .select()
@@ -76,6 +80,31 @@ export default defineEventHandler(async (event) => {
 
             if (relError) {
                 console.error('Failed to update category links', relError)
+            }
+        }
+    }
+
+    // 3. Update Collection Items
+    if (body.is_collection && body.collectionItemIds !== undefined && Array.isArray(body.collectionItemIds)) {
+        // First delete existing relationships
+        await serviceClient
+            .from('collection_items')
+            .delete()
+            .eq('collection_id', body.id)
+
+        // Then insert new ones
+        if (body.collectionItemIds.length > 0) {
+            const collectionLinks = body.collectionItemIds.map((itemId: string) => ({
+                collection_id: body.id,
+                product_id: itemId
+            }))
+
+            const { error: collError } = await serviceClient
+                .from('collection_items')
+                .insert(collectionLinks)
+
+            if (collError) {
+                console.error('Failed to update collection item links', collError)
             }
         }
     }

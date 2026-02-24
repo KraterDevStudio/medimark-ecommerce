@@ -36,13 +36,24 @@
         <div class="grid product-grid">
           <ProductCard v-for="product in section.products" :key="product.id" :product="product" />
         </div>
+
+      </section>
+
+      <!-- All products hero -->
+      <section class="all-products-hero">
+        <div class="section-header">
+          <h2 class="section-title">¿No encontrás lo que buscás?</h2>
+          <p class="section-subtitle">Explorá todos nuestros productos</p>
+        </div>
+        <NuxtLink to="/products" class="btn btn-primary">Ver todos los productos</NuxtLink>
+        <NuxtLink to="/faq" class="subtitle"> Preguntas Frecuentes</NuxtLink>
       </section>
 
       <!-- Default Section if no custom ones -->
       <section v-if="!homeSections?.length" id="products" class="products-section">
         <div class="section-header">
           <h2 class="section-title">Nuestros Productos</h2>
-          <p class="section-subtitle">Descubre nuestra colección</p>
+          <p class="section-subtitle">Descubre todos nuestros productos</p>
         </div>
 
         <div v-if="pending" class="grid product-grid">
@@ -85,6 +96,24 @@ const scrollToProducts = () => {
 </script>
 
 <style scoped>
+.subtitle {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+}
+
+.subtitle:hover {
+  color: var(--color-primary);
+}
+
+.all-products-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 0;
+}
+
 .hero-carousel {
   position: relative;
   height: 300px;

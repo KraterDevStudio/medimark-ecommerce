@@ -89,7 +89,7 @@
           <div class="section">
             <h3>Productos</h3>
             <div class="products-list">
-              <NuxtLink v-for="item in selectedOrder.items" :key="item.id" :to="`/products/${item.id}`"
+              <NuxtLink v-for="item in selectedOrder.items" :key="item.id" :to="`/product/${item.id}`"
                 class="product-item">
                 <img :src="item.image" :alt="item.title" class="product-thumb" />
                 <div class="product-info">
@@ -420,7 +420,7 @@ const getStatusClass = (status: string) => {
   height: 100%;
   width: 100%;
   margin-top: 2rem;
-  color: #404040;
+  color: var(--color-text);
 }
 
 .loading {
@@ -433,7 +433,7 @@ const getStatusClass = (status: string) => {
 }
 
 .table-container {
-  background: white;
+  background: var(--color-card-bg);
   border-radius: 0.5rem;
   border: 1px solid var(--color-border);
   overflow-x: auto;
@@ -457,7 +457,7 @@ const getStatusClass = (status: string) => {
   background-color: var(--color-surface);
   font-weight: 600;
   font-size: 0.875rem;
-  color: #4b5563;
+  color: var(--color-nav-icons);
 }
 
 .order-row {
@@ -466,7 +466,7 @@ const getStatusClass = (status: string) => {
 }
 
 .order-row:hover {
-  background-color: #f9fafb;
+  background-color: var(--color-surface);
 }
 
 .customer-info {
@@ -476,12 +476,12 @@ const getStatusClass = (status: string) => {
 
 .customer-info .name {
   font-weight: 500;
-  color: #111827;
+  color: var(--color-text);
 }
 
 .customer-info .email {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--color-subtitle);
 }
 
 .status-select {
@@ -500,27 +500,27 @@ const getStatusClass = (status: string) => {
 }
 
 .status-pending {
-  background-color: #fef3c7;
-  color: #92400e;
-  border-color: #fcd34d;
+  background-color: var(--color-red-sale);
+  color: var(--color-text);
+  border-color: var(--color-red-sale);
 }
 
 .status-paid {
-  background-color: #d1fae5;
-  color: #065f46;
-  border-color: #6ee7b7;
+  background-color: var(--color-green);
+  color: var(--color-text);
+  border-color: var(--color-green);
 }
 
 .status-completed {
-  background-color: #dbeafe;
-  color: #1e40af;
-  border-color: #93c5fd;
+  background-color: var(--color-blue);
+  color: var(--color-text);
+  border-color: var(--color-blue);
 }
 
 .status-cancelled {
-  background-color: #fee2e2;
-  color: #991b1b;
-  border-color: #fca5a5;
+  background-color: var(--color-red);
+  color: var(--color-text);
+  border-color: var(--color-red);
 }
 
 /* Modal Styles */
@@ -539,10 +539,10 @@ const getStatusClass = (status: string) => {
 }
 
 .modal-content {
-  background: white;
+  background: var(--color-card-bg);
   border-radius: 0.75rem;
   width: 90%;
-  max-width: 600px;
+  max-width: 700px;
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
@@ -554,6 +554,7 @@ const getStatusClass = (status: string) => {
     max-width: none;
     height: 100%;
     max-height: 100%;
+    margin-top: 190px;
     border-radius: 0;
   }
 }
@@ -569,11 +570,11 @@ const getStatusClass = (status: string) => {
 .modal-header h2 {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--color-text);
 }
 
 .order-date {
-  color: #6b7280;
+  color: var(--color-subtitle);
   font-size: 0.875rem;
   margin-top: 0.25rem;
 }
@@ -583,13 +584,13 @@ const getStatusClass = (status: string) => {
   border: none;
   font-size: 2rem;
   line-height: 1;
-  color: #9ca3af;
+  color: var(--color-subtitle);
   cursor: pointer;
   padding: 0;
 }
 
 .close-btn:hover {
-  color: #4b5563;
+  color: var(--color-nav-icons);
 }
 
 .modal-body {
@@ -603,7 +604,7 @@ const getStatusClass = (status: string) => {
 .section h3 {
   font-size: 1rem;
   font-weight: 600;
-  color: #374151;
+  color: var(--color-nav-icons);
   margin-bottom: 1rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -611,7 +612,7 @@ const getStatusClass = (status: string) => {
 
 .customer-details p {
   margin-bottom: 0.5rem;
-  color: #4b5563;
+  color: var(--color-subtitle);
 }
 
 .products-list {
@@ -634,7 +635,7 @@ const getStatusClass = (status: string) => {
 
 .product-item:hover {
   border-color: var(--color-primary);
-  background-color: #f9fafb;
+  background-color: var(--color-surface);
 }
 
 .product-thumb {
@@ -642,7 +643,7 @@ const getStatusClass = (status: string) => {
   height: 50px;
   object-fit: cover;
   border-radius: 0.25rem;
-  background-color: #f3f4f6;
+  background-color: var(--color-surface);
 }
 
 .product-info {
@@ -652,17 +653,17 @@ const getStatusClass = (status: string) => {
 .product-title {
   display: block;
   font-weight: 500;
-  color: #111827;
+  color: var(--color-text);
 }
 
 .product-meta {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--color-subtitle);
 }
 
 .product-total {
   font-weight: 600;
-  color: #111827;
+  color: var(--color-text);
 }
 
 .order-summary {
@@ -675,12 +676,12 @@ const getStatusClass = (status: string) => {
   display: flex;
   justify-content: space-between;
   margin-bottom: 0.5rem;
-  color: #4b5563;
+  color: var(--color-subtitle);
 }
 
 .summary-row.total {
   font-weight: 700;
-  color: #111827;
+  color: var(--color-text);
   font-size: 1.25rem;
   margin-top: 1rem;
 }
@@ -782,7 +783,7 @@ const getStatusClass = (status: string) => {
 
 .item-meta {
   font-size: 0.75rem;
-  color: #6b7280;
+  color: var(--color-subtitle);
 }
 
 .item-actions {
@@ -807,7 +808,7 @@ const getStatusClass = (status: string) => {
 
 .empty-items {
   text-align: center;
-  color: #6b7280;
+  color: var(--color-subtitle);
   font-style: italic;
   padding: 1rem;
   border: 1px dashed var(--color-border);
@@ -827,8 +828,8 @@ const getStatusClass = (status: string) => {
 }
 
 .btn-secondary {
-  background-color: white;
-  color: #374151;
+  background-color: var(--color-card-bg);
+  color: var(--color-text);
   border: 1px solid var(--color-border);
 }
 

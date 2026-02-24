@@ -25,6 +25,8 @@
         <NuxtLink to="/admin" exact-active-class="active" @click="isSidebarOpen = false">Resumen
         </NuxtLink>
         <NuxtLink to="/admin/products" exact-active-class="active" @click="isSidebarOpen = false">Productos</NuxtLink>
+        <NuxtLink to="/admin/collections" exact-active-class="active" @click="isSidebarOpen = false">Colecciones
+        </NuxtLink>
         <NuxtLink to="/admin/categories" exact-active-class="active" @click="isSidebarOpen = false">Categorías
         </NuxtLink>
         <NuxtLink to="/admin/orders" exact-active-class="active" @click="isSidebarOpen = false">Órdenes</NuxtLink>
@@ -77,6 +79,7 @@ onMounted(() => {
 
 const pageTitle = computed(() => {
   if (route.path === '/admin/products') return 'Gestión de Productos'
+  if (route.path === '/admin/collections') return 'Gestión de Colecciones'
   if (route.path.includes('/admin/edit')) return 'Editar Producto'
   if (route.path === '/admin/orders') return 'Gestionar Ordenes'
   if (route.path === '/admin/categories') return 'Gestionar Categorías'
@@ -95,12 +98,12 @@ const pageTitle = computed(() => {
 .admin-layout {
   display: flex;
   min-height: 100vh;
-  background-color: #f3f4f6;
+  background-color: var(--color-bg);
 }
 
 .sidebar {
   width: 250px;
-  background-color: white;
+  background-color: var(--color-bg);
   border-right: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
@@ -134,7 +137,7 @@ const pageTitle = computed(() => {
 .admin-nav a {
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
-  color: #4b5563;
+  color: var(--color-text);
   font-weight: 500;
   transition: all 0.2s;
   text-decoration: none;
@@ -183,7 +186,7 @@ const pageTitle = computed(() => {
 
 .top-bar {
   height: 4rem;
-  background: white;
+  background: var(--color-bg);
   border-bottom: 1px solid var(--color-border);
   display: flex;
   align-items: center;
@@ -198,8 +201,8 @@ const pageTitle = computed(() => {
 /* Mobile Components */
 .mobile-top-bar {
   display: none;
-  height: 4rem;
-  background: white;
+  height: 6rem;
+  background: var(--color-card-bg);
   border-bottom: 1px solid var(--color-border);
   align-items: center;
   padding: 0 1rem;
@@ -216,6 +219,7 @@ const pageTitle = computed(() => {
   font-size: 1.5rem;
   cursor: pointer;
   padding: 0.5rem;
+  color: var(--color-text);
 }
 
 .mobile-logo {
@@ -283,6 +287,7 @@ const pageTitle = computed(() => {
 
   .content-wrapper {
     padding: 1rem;
+    margin-top: 4rem;
   }
 }
 </style>

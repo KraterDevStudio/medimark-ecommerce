@@ -101,7 +101,7 @@
                                 <select v-model="selectedProductId" class="form-select">
                                     <option value="">Añadir producto...</option>
                                     <option v-for="p in allProducts" :key="p.id" :value="p.id">
-                                        {{ p.title }}
+                                        {{ p.title }} {{ p.is_collection ? '(Colección)' : '' }}
                                     </option>
                                 </select>
                                 <button type="button" @click="addProductToSection" class="btn-sm">Añadir</button>
@@ -228,7 +228,7 @@ const closeModal = () => {
 
 const addProductToSection = () => {
     if (!selectedProductId.value) return
-    const prod = allProducts.value.find(p => p.id === parseInt(selectedProductId.value))
+    const prod = allProducts.value.find(p => p.id === selectedProductId.value)
     if (prod && !form.products.find(p => p.id === prod.id)) {
         form.products.push(prod)
     }

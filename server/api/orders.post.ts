@@ -95,16 +95,32 @@ export default defineEventHandler(async (event) => {
         })
     }
 
+    // Calculate effective price helper matching front-end cart logic for verification
+    const getEffectivePrice = (item: any) => {
+        const basePrice = Number(item.price);
+        if (!item.discount_percentage || item.discount_percentage <= 0) return basePrice;
+
+        const now = new Date();
+        if (item.sale_start_date && new Date(item.sale_start_date) > now) return basePrice;
+        if (item.sale_end_date && new Date(item.sale_end_date) < now) return basePrice;
+
+        const discount = basePrice * (item.discount_percentage / 100);
+        return basePrice - discount;
+    }
+
     // Create order items
-    const orderItems = body.items.map((item: any) => ({
-        order_id: order.id,
-        product_id: item.id,
-        product_title: item.title,
-        product_price: item.price,
-        product_image: item.image,
-        quantity: item.quantity,
-        subtotal: item.price * item.quantity
-    }))
+    const orderItems = body.items.map((item: any) => {
+        const effectivePrice = getEffectivePrice(item);
+        return {
+            order_id: order.id,
+            product_id: item.id,
+            product_title: item.title,
+            product_price: effectivePrice,
+            product_image: item.image,
+            quantity: item.quantity,
+            subtotal: effectivePrice * item.quantity
+        };
+    })
 
     const { error: itemsError } = await client
         .from('order_items')
@@ -136,14 +152,17 @@ export default defineEventHandler(async (event) => {
                 }
             })
 
-            const itemsHtml = body.items.map((item: any) => `
+            const itemsHtml = body.items.map((item: any) => {
+                const ep = getEffectivePrice(item);
+                return `
                 <tr>
                     <td style="padding: 8px; border: 1px solid #ddd;">${item.title}</td>
                     <td style="padding: 8px; border: 1px solid #ddd;">${item.quantity}</td>
-                    <td style="padding: 8px; border: 1px solid #ddd;">$${item.price.toLocaleString()}</td>
-                    <td style="padding: 8px; border: 1px solid #ddd;">$${(item.price * item.quantity).toLocaleString()}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">$${ep.toLocaleString()}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">$${(ep * item.quantity).toLocaleString()}</td>
                 </tr>
-            `).join('')
+            `
+            }).join('')
 
             const customerInfo = body.customerInfo
             const mailOptions = {
