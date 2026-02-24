@@ -381,27 +381,6 @@ const saveProduct = async () => {
       payload.sale_end_date = new Date(payload.sale_end_date).toISOString();
     }
 
-    // Create a copy of the form to clean up empty dates
-    const payload = { ...form };
-
-    // If discount is empty, set to 0
-    if (payload.discount_percentage === '') {
-      payload.discount_percentage = 0;
-    }
-
-    // Ensure date payloads are either formatted proper ISO strings or nulls (for empty values)
-    if (!payload.sale_start_date) {
-      (payload.sale_start_date as any) = null;
-    } else {
-      payload.sale_start_date = new Date(payload.sale_start_date).toISOString();
-    }
-
-    if (!payload.sale_end_date) {
-      (payload.sale_end_date as any) = null;
-    } else {
-      payload.sale_end_date = new Date(payload.sale_end_date).toISOString();
-    }
-
     // Parse the varieties string into an array, stripping whitespace, throwing out empty ones
     const parsedVarieties = form.varieties
       .split(',')

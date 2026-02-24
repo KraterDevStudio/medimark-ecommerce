@@ -40,7 +40,7 @@ export default defineEventHandler(async (event) => {
             discount_percentage: body.discount_percentage ? Number(body.discount_percentage) : 0,
             sale_start_date: body.sale_start_date || null,
             sale_end_date: body.sale_end_date || null,
-            is_collection: body.is_collection || false
+            is_collection: body.is_collection || false,
             varieties: body.varieties || []
             // category column is deprecated/removed in favor of relationship
         })
