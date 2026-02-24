@@ -6,7 +6,10 @@
                 <NuxtLink to="/products" class="sidebar-link" exact-active-class="active">
                     Todo
                 </NuxtLink>
+                <NuxtLink to="/products/sale" class="sidebar-link" exact-active-class="active">OFERTAS</NuxtLink>
                 <!-- show all categories, if category has children, click and show tree -->
+                <NuxtLink to="/products/collections" class="sidebar-link" exact-active-class="active">Colecciones
+                </NuxtLink>
                 <div v-for="category in categories" :key="category.id">
                     <NuxtLink :to="`/products/${category.slug}`" class="sidebar-link" exact-active-class="active">
                         {{ category.name }}
@@ -37,14 +40,14 @@
 }
 
 .sidebar {
-    background: white;
+    background-color: var(--color-bg);
     border-radius: 1rem;
     padding: 1.5rem;
     border: 1px solid var(--color-border);
     box-shadow: var(--shadow-sm);
     height: fit-content;
     position: sticky;
-    top: 5rem;
+    top: 12rem;
 }
 
 .sidebar-nav {
@@ -59,7 +62,7 @@
     gap: 0.75rem;
     padding: 0.75rem 1rem;
     border-radius: 0.5rem;
-    color: #4b5563;
+    color: var(--color-subtitle);
     font-weight: 500;
     transition: all 0.2s;
     cursor: pointer;
@@ -85,12 +88,12 @@
 }
 
 .sidebar-link:hover {
-    background: #f9fafb;
+    background-color: var(--color-input-hover);
     color: var(--color-primary);
 }
 
 .sidebar-link.active {
-    background: #eff6ff;
+    background-color: var(--color-surface);
     color: var(--color-primary);
     font-weight: 600;
 }
@@ -101,6 +104,7 @@
     padding: 2rem;
     border: 1px solid var(--color-border);
     box-shadow: var(--shadow-sm);
+    background-color: var(--color-bg);
     min-height: 500px;
 }
 
@@ -130,10 +134,11 @@
 
     .sidebar-link {
         white-space: nowrap;
-        background: white;
+        background: var(--color-bg);
         border: 1px solid var(--color-border);
         padding: 0.5rem 1rem;
     }
+
 
     .children {
         display: none;

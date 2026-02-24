@@ -12,6 +12,7 @@ export interface Product {
     is_collection?: boolean;
     collection_items?: Partial<Product>[];
     categories?: { id: number; name: string; slug: string }[];
+    created_at?: string;
 }
 
 export interface CartItem extends Product {

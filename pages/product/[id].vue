@@ -121,7 +121,10 @@ useHead({
 }
 
 .product-detail {
-  padding-top: 4rem;
+  min-height: 80vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .product-grid-layout {

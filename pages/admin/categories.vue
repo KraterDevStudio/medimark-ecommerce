@@ -213,7 +213,7 @@ const CategoryItem = defineComponent({
   height: 100%;
   width: 100%;
   margin-top: 2rem;
-  color: #404040;
+  color: var(--color-text);
 }
 
 .loading {
@@ -232,7 +232,7 @@ const CategoryItem = defineComponent({
 }
 
 .category-tree {
-  background: white;
+  background: var(--color-card-bg);
   border-radius: 0.5rem;
   padding: 1rem;
   border: 1px solid var(--color-border);
@@ -248,25 +248,25 @@ const CategoryItem = defineComponent({
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem;
-  background-color: #f9fafb;
+  background-color: var(--color-surface);
   border-radius: 0.375rem;
   border: 1px solid transparent;
 }
 
 :deep(.category-row:hover) {
   border-color: var(--color-primary);
-  background-color: #f3f4f6;
+  background-color: var(--color-surface);
 }
 
 :deep(.category-name) {
   font-weight: 500;
-  color: #1f2937;
+  color: var(--color-text);
 }
 
 :deep(.category-children) {
   margin-left: 1.5rem;
   padding-left: 1rem;
-  border-left: 2px solid #e5e7eb;
+  border-left: 2px solid var(--color-border);
   margin-top: 0.5rem;
 }
 
@@ -292,9 +292,9 @@ const CategoryItem = defineComponent({
 }
 
 .btn-secondary {
-  background-color: white;
-  color: #374151;
-  border: 1px solid #d1d5db;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
   padding: 0.5rem 1rem;
   border-radius: 0.375rem;
   cursor: pointer;
@@ -309,18 +309,18 @@ const CategoryItem = defineComponent({
 }
 
 :deep(.btn-add) {
-  background-color: #d1fae5;
-  color: #065f46;
+  background-color: var(--color-green);
+  color: var(--color-text);
 }
 
 :deep(.btn-edit) {
-  background-color: #dbeafe;
-  color: #1e40af;
+  background-color: var(--color-blue);
+  color: var(--color-text);
 }
 
 :deep(.btn-delete) {
-  background-color: #fee2e2;
-  color: #991b1b;
+  background-color: var(--color-red);
+  color: var(--color-text);
 }
 
 /* Modal Styles */

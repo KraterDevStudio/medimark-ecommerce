@@ -164,7 +164,7 @@
                     {{ p.title }} ({{ formatPrice(p.price) }})
                   </option>
                 </select>
-                <button type="button" @click="addProductToCollection" class="btn-sm">Añadir</button>
+                <button type="button" @click="addProductToCollection" class="btn">Añadir</button>
               </div>
 
               <div class="selected-products">
@@ -460,7 +460,7 @@ const saveProduct = async () => {
 
 <style scoped>
 .hover-table:hover {
-  background-color: #f5f5f5;
+  background-color: var(--color-surface);
   cursor: pointer;
 }
 
@@ -469,7 +469,7 @@ const saveProduct = async () => {
   justify-content: center;
   align-items: center;
   height: 200px;
-  color: #404040;
+  color: var(--color-subtitle);
 }
 
 .info-total {
@@ -479,7 +479,7 @@ const saveProduct = async () => {
   height: 100%;
   width: 100%;
   margin-top: 2rem;
-  color: #404040;
+  color: var(--color-subtitle);
 }
 
 .close-btn {
@@ -487,6 +487,7 @@ const saveProduct = async () => {
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
+  color: var(--color-text);
 }
 
 .loading {
@@ -520,6 +521,11 @@ const saveProduct = async () => {
     @media(max-width: 768px) {
       width: 100%;
     }
+
+    input {
+      background-color: var(--color-text-input);
+      color: var(--color-text);
+    }
   }
 
   /* show  refresh button inside of the input, to the left*/
@@ -551,7 +557,7 @@ const saveProduct = async () => {
 }
 
 .table-container {
-  background: white;
+  background: var(--color-card-bg);
   border-radius: 0.5rem;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
   overflow-x: auto;
@@ -577,7 +583,7 @@ const saveProduct = async () => {
   background-color: var(--color-surface);
   font-weight: 600;
   font-size: 0.875rem;
-  color: #4b5563;
+  color: var(--color-subtitle);
 }
 
 .thumb {
@@ -599,18 +605,26 @@ const saveProduct = async () => {
   font-size: 0.75rem;
   font-weight: 600;
   margin-left: 0.5rem;
+
+  @media(max-width: 768px) {
+    font-size: 0.5rem;
+    padding: 0;
+    width: 40px;
+    height: 20px;
+    border-radius: 4px;
+  }
 }
 
 .badge-archived {
-  background-color: #f3f4f6;
-  color: #4b5563;
-  border: 1px solid #d1d5db;
+  background-color: var(--color-surface);
+  color: var(--color-subtitle);
+  border: 1px solid var(--color-border);
 }
 
 .badge-sale {
-  background-color: #fef2f2;
-  color: #ef4444;
-  border: 1px solid #fecaca;
+  background-color: var(--color-red-sale);
+  color: white;
+  border: 1px solid var(--color-red-sale);
 }
 
 .original-price {
@@ -641,7 +655,7 @@ const saveProduct = async () => {
 }
 
 .btn-dots:hover {
-  background-color: #f3f4f6;
+  background-color: var(--color-bg);
   color: var(--color-primary);
 }
 
@@ -649,7 +663,7 @@ const saveProduct = async () => {
   position: absolute;
   top: 50%;
   left: 15px;
-  background: white;
+  background-color: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: 0.5rem;
   box-shadow: var(--shadow-lg);
@@ -680,12 +694,12 @@ const saveProduct = async () => {
   border: none;
   cursor: pointer;
   font-size: 0.875rem;
-  color: #374151;
+  color: var(--color-subtitle);
   width: 100%;
 }
 
 .dropdown-menu button:hover {
-  background-color: #f9fafb;
+  background-color: var(--color-bg);
   color: var(--color-primary);
 }
 
@@ -714,16 +728,27 @@ const saveProduct = async () => {
 }
 
 .modal-content {
-  background: white;
+  background: var(--color-card-bg);
   border-radius: 0.5rem;
   width: 90%;
   max-width: 700px;
   padding: 1.5rem;
   max-height: 90vh;
   overflow-y: auto;
+
+  input,
+  textarea {
+    background-color: var(--color-text-input);
+    color: var(--color-text);
+  }
+
+  label {
+    color: var(--color-text);
+  }
+
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .modal-content {
     width: 100%;
     max-width: none;
@@ -731,6 +756,7 @@ const saveProduct = async () => {
     max-height: 100%;
     border-radius: 0;
     padding: 1rem;
+    margin-top: 12rem;
   }
 }
 
@@ -858,7 +884,7 @@ textarea:focus {
   align-items: center;
   gap: 0.75rem;
   padding: 0.5rem;
-  background: #f9fafb;
+  background: var(--color-surface);
   border-radius: 0.375rem;
 }
 
@@ -882,7 +908,12 @@ textarea:focus {
 }
 
 .drag-handle {
-  color: #9ca3af;
+  color: var(--color-text);
   cursor: move;
+}
+
+.form-select {
+  background-color: var(--color-text-input);
+  color: var(--color-text);
 }
 </style>

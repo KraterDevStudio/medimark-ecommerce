@@ -70,7 +70,7 @@ const getDisplayDiscount = (product: Product) => {
   padding: 0.25rem 0.5rem;
   border-radius: 9999px;
   font-size: 0.75rem;
-  z-index: 99999;
+  z-index: 10;
   font-weight: 600;
 }
 
@@ -78,7 +78,7 @@ const getDisplayDiscount = (product: Product) => {
   border: 1px solid var(--color-border);
   border-radius: 0.5rem;
   overflow: hidden;
-  background: white;
+  background: var(--color-card-bg);
   transition: transform 0.2s, box-shadow 0.2s;
   display: flex;
   flex-direction: column;
@@ -128,7 +128,8 @@ const getDisplayDiscount = (product: Product) => {
 
 .category {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--color-text);
+  opacity: 0.7;
   margin-bottom: 1.5rem;
 }
 
@@ -148,7 +149,8 @@ const getDisplayDiscount = (product: Product) => {
 
 .original-price {
   text-decoration: line-through;
-  color: #9ca3af;
+  color: var(--color-text);
+  opacity: 0.5;
   font-size: 0.875rem;
   line-height: 1;
 }
@@ -166,7 +168,7 @@ const getDisplayDiscount = (product: Product) => {
 .badge-sale {
   background-color: #fef2f2;
   color: #ef4444;
-  border: 1px solid #fecaca;
+  border: 1px solid var(--color-border);
   padding: 0.25rem 0.5rem;
   border-radius: 9999px;
   font-size: 0.75rem;
@@ -196,7 +198,7 @@ const getDisplayDiscount = (product: Product) => {
   justify-content: center;
   border-radius: 50%;
   border: none;
-  background: white;
+  background: var(--color-card-bg);
   color: var(--color-text);
   cursor: pointer;
   font-weight: 600;

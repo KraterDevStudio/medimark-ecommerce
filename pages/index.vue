@@ -45,7 +45,7 @@
           <h2 class="section-title">¿No encontrás lo que buscás?</h2>
           <p class="section-subtitle">Explorá todos nuestros productos</p>
         </div>
-        <NuxtLink to="/category" class="btn btn-primary">Ver todos los productos</NuxtLink>
+        <NuxtLink to="/products" class="btn btn-primary">Ver todos los productos</NuxtLink>
         <NuxtLink to="/faq" class="subtitle"> Preguntas Frecuentes</NuxtLink>
       </section>
 

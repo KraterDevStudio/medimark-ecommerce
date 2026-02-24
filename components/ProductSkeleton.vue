@@ -56,9 +56,27 @@
     border: 1px solid var(--color-border);
     border-radius: 0.5rem;
     overflow: hidden;
-    background: white;
+    background: var(--color-card-bg);
     display: flex;
     flex-direction: column;
+}
+
+.skeleton {
+    background: var(--color-border);
+    opacity: 0.5;
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 0.4;
+    }
+
+    50% {
+        opacity: 0.2;
+    }
 }
 
 .content {
