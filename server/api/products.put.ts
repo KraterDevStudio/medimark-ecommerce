@@ -35,6 +35,7 @@ export default defineEventHandler(async (event) => {
             price: Number(body.price),
             description: body.description,
             image: body.image,
+            varieties: body.varieties || [],
             is_archived: body.is_archived,
             discount_percentage: body.discount_percentage !== undefined ? Number(body.discount_percentage) : undefined,
             sale_start_date: body.sale_start_date !== undefined ? body.sale_start_date : undefined,

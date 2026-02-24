@@ -144,6 +144,12 @@
           </div>
 
           <div class="form-group">
+            <label>Variedades (opcional)</label>
+            <input v-model="form.varieties" type="text" placeholder="Ej: Azul, Verde, Rojo" />
+            <small class="help-text">Separa las opciones con comas.</small>
+          </div>
+
+          <div class="form-group">
             <label>Imagen</label>
             <input v-model="form.image" type="url" placeholder="https://..." required />
           </div>
@@ -190,7 +196,8 @@ const form = reactive({
   description: '',
   discount_percentage: '' as string | number,
   sale_start_date: '',
-  sale_end_date: ''
+  sale_end_date: '',
+  varieties: ''
 })
 
 const isEditing = ref(false)
@@ -273,6 +280,7 @@ const openCreateModal = () => {
   form.discount_percentage = ''
   form.sale_start_date = ''
   form.sale_end_date = ''
+  form.varieties = ''
   showModal.value = true
 }
 
@@ -296,6 +304,7 @@ const openEditModal = (product: Product) => {
   form.sale_start_date = formatDatetime(product.sale_start_date)
   form.sale_end_date = formatDatetime(product.sale_end_date)
 
+  form.varieties = product.varieties ? product.varieties.join(', ') : ''
   showModal.value = true
 }
 
@@ -372,9 +381,39 @@ const saveProduct = async () => {
       payload.sale_end_date = new Date(payload.sale_end_date).toISOString();
     }
 
+    // Create a copy of the form to clean up empty dates
+    const payload = { ...form };
+
+    // If discount is empty, set to 0
+    if (payload.discount_percentage === '') {
+      payload.discount_percentage = 0;
+    }
+
+    // Ensure date payloads are either formatted proper ISO strings or nulls (for empty values)
+    if (!payload.sale_start_date) {
+      (payload.sale_start_date as any) = null;
+    } else {
+      payload.sale_start_date = new Date(payload.sale_start_date).toISOString();
+    }
+
+    if (!payload.sale_end_date) {
+      (payload.sale_end_date as any) = null;
+    } else {
+      payload.sale_end_date = new Date(payload.sale_end_date).toISOString();
+    }
+
+    // Parse the varieties string into an array, stripping whitespace, throwing out empty ones
+    const parsedVarieties = form.varieties
+      .split(',')
+      .map(v => v.trim())
+      .filter(v => v !== '')
+
     await $fetch(url, {
       method,
-      body: payload
+      body: {
+        ...payload,
+        varieties: parsedVarieties
+      }
     })
     await refresh()
     closeModal()
@@ -408,6 +447,12 @@ const saveProduct = async () => {
   width: 100%;
   margin-top: 2rem;
   color: var(--color-subtitle);
+}
+
+.help-text {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
 }
 
 .close-btn {

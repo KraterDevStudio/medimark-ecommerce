@@ -11,6 +11,7 @@ CREATE TABLE products (
   description TEXT,
   category TEXT,
   image TEXT,
+  varieties TEXT[] DEFAULT '{}',
   is_archived BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -138,6 +139,7 @@ CREATE TABLE order_items (
   product_title TEXT NOT NULL,
   product_price NUMERIC(10, 2) NOT NULL CHECK (product_price >= 0),
   product_image TEXT,
+  selected_variety TEXT,
   quantity INTEGER NOT NULL CHECK (quantity > 0),
   subtotal NUMERIC(10, 2) NOT NULL CHECK (subtotal >= 0),
   created_at TIMESTAMPTZ DEFAULT NOW()

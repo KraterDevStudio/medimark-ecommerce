@@ -9,10 +9,11 @@
 
     <div v-else class="cart-content">
       <div class="cart-items">
-        <div v-for="item in items" :key="item.id" class="cart-item">
+        <div v-for="item in items" :key="item.cartItemId" class="cart-item">
           <img :src="item.image" :alt="item.title" class="item-image" />
           <div class="item-details">
-            <h3>{{ item.title }}</h3>
+            <h3>{{ item.title }} <small v-if="item.selectedVariety" class="variety-badge">{{ item.selectedVariety
+                }}</small></h3>
             <p class="price">
               <span v-if="getEffectivePrice(item) < item.price" class="original-price">{{ formatPrice(item.price)
                 }}</span>
@@ -207,5 +208,15 @@ h1 {
 
 .btn-clear:hover {
   background-color: #f9fafb;
+}
+
+.variety-badge {
+  background: #f3f4f6;
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: #4b5563;
+  margin-left: 0.5rem;
+  font-weight: normal;
 }
 </style>

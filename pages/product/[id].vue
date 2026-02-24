@@ -44,12 +44,22 @@
         </div>
 
         <div class="actions">
-          <div v-if="quantity > 0" class="quantity-selector">
-            <button class="btn-qty" @click="updateQuantity(product.id, quantity - 1)">-</button>
-            <span class="quantity-value">{{ quantity }}</span>
-            <button class="btn-qty" @click="updateQuantity(product.id, quantity + 1)">+</button>
+          <div v-if="product.varieties && product.varieties.length > 0" class="variety-selector">
+            <label for="variety">Selecciona una opción:</label>
+            <select id="variety" v-model="selectedVariety" class="form-select">
+              <option value="" disabled>Elige un modelo/color...</option>
+              <option v-for="variety in product.varieties" :key="variety" :value="variety">{{ variety }}</option>
+            </select>
           </div>
-          <button v-else class="btn btn-lg" @click="addToCart(product)">Agregar al carrito</button>
+
+          <div v-if="quantity > 0" class="quantity-selector">
+            <button class="btn-qty" @click="updateQuantity(cartItemId, quantity - 1)">-</button>
+            <span class="quantity-value">{{ quantity }}</span>
+            <button class="btn-qty" @click="updateQuantity(cartItemId, quantity + 1)">+</button>
+          </div>
+          <button v-else class="btn btn-lg" @click="handleAddToCart" :disabled="isAddToCartDisabled">
+            Agregar al carrito
+          </button>
         </div>
       </div>
     </div>
@@ -74,7 +84,29 @@ const { data: products, pending } = await useLazyFetch<Product[]>('/api/products
 const product = computed(() => products.value?.find(p => p.id === route.params.id))
 const { addToCart, formatPrice, updateQuantity, getItemQuantity, getEffectivePrice, getOriginalPrice } = useCart()
 
-const quantity = computed(() => product.value ? getItemQuantity(product.value.id) : 0)
+const selectedVariety = ref<string>('')
+
+// Derived ID that includes the selected variety to check the specific cart item quantity
+const cartItemId = computed(() => {
+  if (!product.value) return ''
+  return selectedVariety.value ? `${product.value.id}-${selectedVariety.value}` : product.value.id
+})
+
+const quantity = computed(() => cartItemId.value ? getItemQuantity(cartItemId.value) : 0)
+
+const isAddToCartDisabled = computed(() => {
+  if (!product.value) return true
+  // If product has varieties, require one to be selected
+  if (product.value.varieties && product.value.varieties.length > 0) {
+    return !selectedVariety.value
+  }
+  return false
+})
+
+const handleAddToCart = () => {
+  if (!product.value || isAddToCartDisabled.value) return
+  addToCart(product.value, selectedVariety.value || null)
+}
 
 const getDisplayDiscount = (product: Product) => {
   if (product.discount_percentage && getEffectivePrice(product) < product.price) return product.discount_percentage;
@@ -304,5 +336,38 @@ useHead({
   font-size: 1.25rem;
   min-width: 2rem;
   text-align: center;
+}
+
+.variety-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.variety-selector label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.875rem;
+}
+
+.form-select {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  background-color: white;
+  color: var(--color-text);
+  cursor: pointer;
+  outline: none;
+}
+
+.form-select:focus {
+  border-color: var(--color-primary);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>
