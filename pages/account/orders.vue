@@ -94,7 +94,7 @@ const formatDate = (dateString: string) => {
 }
 
 .order-card {
-  background: white;
+  background: var(--color-surface);
   border-radius: 0.5rem;
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--color-border);
@@ -117,7 +117,7 @@ const formatDate = (dateString: string) => {
 }
 
 .order-date {
-  color: #6b7280;
+  color: var(--color-text-light);
   font-size: 0.875rem;
 }
 
@@ -138,12 +138,12 @@ const formatDate = (dateString: string) => {
   display: flex;
   justify-content: space-between;
   margin-bottom: 0.5rem;
-  color: #4b5563;
+  color: var(--color-text-light);
 }
 
 .order-footer {
   padding: 1rem 1.5rem;
-  background: #f9fafb;
+  background: var(--color-surface);
   border-top: 1px solid var(--color-border);
   display: flex;
   justify-content: space-between;
@@ -161,11 +161,11 @@ const formatDate = (dateString: string) => {
 }
 
 .variety-badge {
-  background: #f3f4f6;
+  background: var(--color-surface);
   padding: 0.125rem 0.375rem;
   border-radius: 4px;
   font-size: 0.75rem;
-  color: #4b5563;
+  color: var(--color-text-light);
   margin-left: 0.25rem;
 }
 </style>

@@ -70,13 +70,18 @@ const handleRegister = async () => {
 }
 
 .register-card {
-  background: white;
+  background: var(--color-bg);
   padding: 2.5rem;
   border-radius: 1rem;
   box-shadow: var(--shadow-md);
   width: 100%;
   max-width: 450px;
   border: 1px solid var(--color-border);
+
+  input {
+    background: var(--color-surface);
+    color: var(--color-text);
+  }
 }
 
 h1 {

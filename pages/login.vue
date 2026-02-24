@@ -33,7 +33,7 @@
   text-align: right;
   margin-top: 0.5rem;
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--color-text-light);
 }
 
 .forgot-password a {
@@ -49,7 +49,7 @@
   text-align: center;
   margin-top: 1.5rem;
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--color-text-light);
 }
 
 .register-link a {
@@ -69,7 +69,7 @@
 }
 
 .login-card {
-  background: white;
+  background: var(--color-surface);
   padding: 2.5rem;
   border-radius: 1rem;
   box-shadow: var(--shadow-md);
@@ -108,7 +108,7 @@ h1 {
 }
 
 .error-msg {
-  color: #ef4444;
+  color: var(--color-danger);
   margin-bottom: 1rem;
   text-align: center;
 }
@@ -159,13 +159,18 @@ const handleLogin = async () => {
 }
 
 .login-card {
-  background: white;
+  background: var(--color-bg);
   padding: 2.5rem;
   border-radius: 1rem;
   box-shadow: var(--shadow-md);
   width: 100%;
   max-width: 400px;
   border: 1px solid var(--color-border);
+
+  input {
+    background: var(--color-surface);
+    color: var(--color-text);
+  }
 }
 
 h1 {

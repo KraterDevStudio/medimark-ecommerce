@@ -209,7 +209,7 @@ const handleUpdatePassword = async () => {
 }
 
 .modal-content {
-  background: white;
+  background: var(--color-surface);
   border-radius: 1rem;
   padding: 2rem;
   width: 100%;
@@ -234,7 +234,7 @@ const handleUpdatePassword = async () => {
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #9ca3af;
+  color: var(--color-text-light);
 }
 
 .form-group {
@@ -252,7 +252,7 @@ const handleUpdatePassword = async () => {
 .form-group label {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #374151;
+  color: var(--color-text-light);
 }
 
 .form-group input {
@@ -275,14 +275,14 @@ const handleUpdatePassword = async () => {
 }
 
 .error-msg {
-  color: #ef4444;
+  color: var(--color-danger);
   font-size: 0.875rem;
   margin-bottom: 1rem;
 }
 
 .success-alert {
-  background-color: #f0fdf4;
-  color: #166534;
+  background-color: var(--color-success);
+  color: var(--color-text-light);
   padding: 0.75rem;
   border-radius: 0.5rem;
   margin-bottom: 1.5rem;

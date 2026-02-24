@@ -1,7 +1,7 @@
 <template>
   <div class="container account-layout">
     <h1 class="page-title">Mi Cuenta</h1>
-    
+
     <div class="account-container">
       <aside class="account-sidebar">
         <nav class="sidebar-nav">
@@ -16,7 +16,7 @@
           </span>
         </nav>
       </aside>
-      
+
       <main class="account-content">
         <NuxtPage />
       </main>
@@ -30,15 +30,15 @@ const router = useRouter()
 
 // Protection logic here as well
 watchEffect(() => {
-    if (!user.value) {
-        router.push('/login')
-    }
+  if (!user.value) {
+    router.push('/login')
+  }
 })
 
 const logout = () => {
-    const { logout } = useAuth()
-    logout()
-    router.push('/login')
+  const { logout } = useAuth()
+  logout()
+  router.push('/login')
 }
 </script>
 
@@ -61,7 +61,7 @@ const logout = () => {
 }
 
 .account-sidebar {
-  background: white;
+  background: var(--color-bg);
   border-radius: 1rem;
   padding: 1.5rem;
   border: 1px solid var(--color-border);
@@ -102,7 +102,7 @@ const logout = () => {
 }
 
 .account-content {
-  background: white;
+  background: var(--color-bg);
   border-radius: 1rem;
   padding: 2.5rem;
   border: 1px solid var(--color-border);
