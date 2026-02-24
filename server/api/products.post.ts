@@ -40,6 +40,7 @@ export default defineEventHandler(async (event) => {
             discount_percentage: body.discount_percentage ? Number(body.discount_percentage) : 0,
             sale_start_date: body.sale_start_date || null,
             sale_end_date: body.sale_end_date || null,
+            is_collection: body.is_collection || false
             // category column is deprecated/removed in favor of relationship
         })
         .select()
@@ -67,6 +68,28 @@ export default defineEventHandler(async (event) => {
         if (relError) {
             // Log error but don't fail the whole request (product is created)
             console.error('Failed to link categories', relError)
+        }
+    }
+
+    // 3. Create Collection Items Relationships
+    if (body.is_collection && body.collectionItemIds && Array.isArray(body.collectionItemIds) && body.collectionItemIds.length > 0) {
+        const collectionLinks = body.collectionItemIds.map((itemId: string) => ({
+            collection_id: product.id,
+            product_id: parseInt(itemId) > 0 ? itemId : undefined // Ensure it is treated correctly although it's UUID.
+        }))
+
+        // Actually, product IDs are UUIDs. Let's just pass them directly
+        const validCollectionLinks = body.collectionItemIds.map((itemId: string) => ({
+            collection_id: product.id,
+            product_id: itemId
+        }))
+
+        const { error: collError } = await serviceClient
+            .from('collection_items')
+            .insert(validCollectionLinks)
+
+        if (collError) {
+            console.error('Failed to link collection items', collError)
         }
     }
 

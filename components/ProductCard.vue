@@ -1,17 +1,18 @@
 <template>
   <div class="product-card">
     <div class="image-wrapper">
-      <NuxtLink :to="`/products/${product.id}`">
-        <div v-if="product.discount_percentage && getEffectivePrice(product) < product.price"
+      <NuxtLink :to="`/product/${product.id}`">
+        <div
+          v-if="(product.discount_percentage && getEffectivePrice(product) < product.price) || (product.is_collection && getOriginalPrice(product) > getEffectivePrice(product))"
           class="floating-badge-sale">
-          {{ product.discount_percentage }}% OFF
+          {{ getDisplayDiscount(product) }}% OFF
         </div>
         <img :src="product.image" :alt="product.title" loading="lazy" />
       </NuxtLink>
     </div>
     <div class="content">
       <h3 class="title">
-        <NuxtLink :to="`/products/${product.id}`">{{ product.title }}</NuxtLink>
+        <NuxtLink :to="`/product/${product.id}`">{{ product.title }}</NuxtLink>
       </h3>
       <p class="category">
         <span v-for="(cat, index) in product.categories" :key="cat.id">
@@ -21,9 +22,10 @@
       </p>
       <div class="footer">
         <div class="price-container">
-          <span v-if="getEffectivePrice(product) < product.price" class="original-price">{{ formatPrice(product.price)
+          <span v-if="getOriginalPrice(product) > getEffectivePrice(product)" class="original-price">{{
+            formatPrice(getOriginalPrice(product))
           }}</span>
-          <span class="price" :class="{ 'price-on-sale': getEffectivePrice(product) < product.price }">{{
+          <span class="price" :class="{ 'price-on-sale': getOriginalPrice(product) > getEffectivePrice(product) }">{{
             formatPrice(getEffectivePrice(product)) }}</span>
         </div>
         <div v-if="quantity > 0" class="quantity-selector">
@@ -44,9 +46,17 @@ const props = defineProps<{
   product: Product
 }>()
 
-const { addToCart, updateQuantity, getItemQuantity, formatPrice, getEffectivePrice } = useCart()
+const { addToCart, updateQuantity, getItemQuantity, formatPrice, getEffectivePrice, getOriginalPrice } = useCart()
 
 const quantity = computed(() => getItemQuantity(props.product.id))
+
+const getDisplayDiscount = (product: Product) => {
+  if (product.discount_percentage && getEffectivePrice(product) < product.price) return product.discount_percentage;
+  if (product.is_collection && getOriginalPrice(product) > getEffectivePrice(product)) {
+    return Math.round((1 - (getEffectivePrice(product) / getOriginalPrice(product))) * 100);
+  }
+  return 0;
+}
 </script>
 
 <style scoped>

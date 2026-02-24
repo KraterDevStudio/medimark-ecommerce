@@ -1,7 +1,7 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
-    const { category, search, hardRefresh } = getQuery(event)
+    const { category, search, hardRefresh, type } = getQuery(event)
     const storage = useStorage('cache')
 
     // Check if user is admin
@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
         isAdmin = profile?.role === 'admin'
     }
 
-    const cacheKey = `products_${isAdmin ? 'admin' : 'public'}_${category || 'all'}_${search || 'none'}`
+    const cacheKey = `products_${isAdmin ? 'admin' : 'public'}_${category || 'all'}_${search || 'none'}_${type || 'all'}`
 
     // Try to get from cache
     const cached = await storage.getItem(cacheKey)
@@ -34,6 +34,9 @@ export default defineEventHandler(async (event) => {
             *,
             categories:product_categories(
                 category:categories(*)
+            ),
+            collection_items:collection_items!collection_id(
+                product:products!product_id(id, title, price, discount_percentage, sale_start_date, sale_end_date, image)
             )
         `
 
@@ -53,6 +56,12 @@ export default defineEventHandler(async (event) => {
 
     if (category) {
         query = query.eq('filter_categories.category.slug', category)
+    }
+
+    if (type === 'collection') {
+        query = query.eq('is_collection', true)
+    } else if (type === 'product') {
+        query = query.eq('is_collection', false)
     }
 
     // Filter archived products for non-admins
@@ -76,12 +85,19 @@ export default defineEventHandler(async (event) => {
     let transformedProducts = products.map(product => {
         const categories = (product.categories as any[]).map((pc: any) => pc.category).filter(Boolean)
         const categoryString = categories.map((c: any) => c.name).join(', ')
-        const { filter_categories, ...rest } = product as any
+
+        let collectionItemsObj = [];
+        if (product.collection_items) {
+            collectionItemsObj = (product.collection_items as any[]).map((ci: any) => ci.product).filter(Boolean)
+        }
+
+        const { filter_categories, collection_items, ...rest } = product as any
 
         return {
             ...rest,
             categories,
-            category: categoryString
+            category: categoryString,
+            collection_items: collectionItemsObj
         }
     })
 

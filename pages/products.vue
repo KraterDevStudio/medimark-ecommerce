@@ -3,16 +3,16 @@
     <div class="container">
         <aside class="sidebar">
             <nav class="sidebar-nav">
-                <NuxtLink to="/category" class="sidebar-link" exact-active-class="active">
+                <NuxtLink to="/products" class="sidebar-link" exact-active-class="active">
                     Todo
                 </NuxtLink>
                 <!-- show all categories, if category has children, click and show tree -->
                 <div v-for="category in categories" :key="category.id">
-                    <NuxtLink :to="`/category/${category.slug}`" class="sidebar-link" exact-active-class="active">
+                    <NuxtLink :to="`/products/${category.slug}`" class="sidebar-link" exact-active-class="active">
                         {{ category.name }}
                     </NuxtLink>
                     <div v-if="category.children.length > 0" class="children">
-                        <NuxtLink v-for="child in category.children" :key="child.id" :to="`/category/${child.slug}`"
+                        <NuxtLink v-for="child in category.children" :key="child.name" :to="`/products/${child.name}`"
                             class="sidebar-link" exact-active-class="active">
                             {{ child.name }}
                         </NuxtLink>
@@ -148,5 +148,5 @@
 </style>
 
 <script setup lang="ts">
-const { data: categories } = await useFetch('/api/categories')
+const { data: categories, pending } = await useLazyFetch('/api/categories')
 </script>

@@ -25,6 +25,8 @@
         <NuxtLink to="/admin" exact-active-class="active" @click="isSidebarOpen = false">Resumen
         </NuxtLink>
         <NuxtLink to="/admin/products" exact-active-class="active" @click="isSidebarOpen = false">Productos</NuxtLink>
+        <NuxtLink to="/admin/collections" exact-active-class="active" @click="isSidebarOpen = false">Colecciones
+        </NuxtLink>
         <NuxtLink to="/admin/categories" exact-active-class="active" @click="isSidebarOpen = false">Categorías
         </NuxtLink>
         <NuxtLink to="/admin/orders" exact-active-class="active" @click="isSidebarOpen = false">Órdenes</NuxtLink>
@@ -77,6 +79,7 @@ onMounted(() => {
 
 const pageTitle = computed(() => {
   if (route.path === '/admin/products') return 'Gestión de Productos'
+  if (route.path === '/admin/collections') return 'Gestión de Colecciones'
   if (route.path.includes('/admin/edit')) return 'Editar Producto'
   if (route.path === '/admin/orders') return 'Gestionar Ordenes'
   if (route.path === '/admin/categories') return 'Gestionar Categorías'
@@ -198,7 +201,7 @@ const pageTitle = computed(() => {
 /* Mobile Components */
 .mobile-top-bar {
   display: none;
-  height: 4rem;
+  height: 6rem;
   background: white;
   border-bottom: 1px solid var(--color-border);
   align-items: center;
@@ -283,6 +286,7 @@ const pageTitle = computed(() => {
 
   .content-wrapper {
     padding: 1rem;
+    margin-top: 4rem;
   }
 }
 </style>

@@ -89,7 +89,7 @@
           <div class="section">
             <h3>Productos</h3>
             <div class="products-list">
-              <NuxtLink v-for="item in selectedOrder.items" :key="item.id" :to="`/products/${item.id}`"
+              <NuxtLink v-for="item in selectedOrder.items" :key="item.id" :to="`/product/${item.id}`"
                 class="product-item">
                 <img :src="item.image" :alt="item.title" class="product-thumb" />
                 <div class="product-info">
@@ -542,7 +542,7 @@ const getStatusClass = (status: string) => {
   background: white;
   border-radius: 0.75rem;
   width: 90%;
-  max-width: 600px;
+  max-width: 700px;
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
@@ -554,6 +554,7 @@ const getStatusClass = (status: string) => {
     max-width: none;
     height: 100%;
     max-height: 100%;
+    margin-top: 190px;
     border-radius: 0;
   }
 }

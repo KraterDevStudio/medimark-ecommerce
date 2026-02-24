@@ -138,10 +138,10 @@
       <div class="category-nav desktop-only">
         <ul class="cat-list">
           <li class="cat-item">
-            <NuxtLink to="/category" class="cat-link">Productos</NuxtLink>
+            <NuxtLink to="/products" class="cat-link">Productos</NuxtLink>
           </li>
           <li v-for="category in categories" :key="category.id" class="cat-item">
-            <NuxtLink :to="`/category/${category.slug}`" class="cat-link">
+            <NuxtLink :to="`/products/${category.slug}`" class="cat-link">
               {{ category.name }}
               <span v-if="category.children && category.children.length" class="arrow">▾</span>
             </NuxtLink>
@@ -188,15 +188,15 @@
               <h3>Categorías</h3>
               <ul class="mobile-cat-list">
                 <li>
-                  <NuxtLink to="/category" @click="isMobileMenuOpen = false">Todos los Productos</NuxtLink>
+                  <NuxtLink to="/products" @click="isMobileMenuOpen = false">Todos los Productos</NuxtLink>
                 </li>
                 <li v-for="category in categories" :key="category.id">
-                  <NuxtLink :to="`/category/${category.slug}`" @click="isMobileMenuOpen = false">
+                  <NuxtLink :to="`/products/${category.slug}`" @click="isMobileMenuOpen = false">
                     {{ category.name }}
                   </NuxtLink>
                   <ul v-if="category.children && category.children.length" class="mobile-sub-cats">
                     <li v-for="child in category.children" :key="child.id">
-                      <NuxtLink :to="`/category/${child.slug}`" @click="isMobileMenuOpen = false">
+                      <NuxtLink :to="`/products/${child.slug}`" @click="isMobileMenuOpen = false">
                         {{ child.name }}
                       </NuxtLink>
                     </li>

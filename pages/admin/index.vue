@@ -15,6 +15,15 @@
             </div>
 
             <div class="stat-card">
+                <div class="stat-icon collections-icon">📦</div>
+                <div class="stat-content">
+                    <h3>Colecciones</h3>
+                    <p class="stat-value">{{ summary?.totalCollections }}</p>
+                    <NuxtLink to="/admin/collections" class="stat-link">Gestionar</NuxtLink>
+                </div>
+            </div>
+
+            <div class="stat-card">
                 <div class="stat-icon categories-icon">📁</div>
                 <div class="stat-content">
                     <h3>Categorías</h3>
@@ -22,6 +31,8 @@
                     <NuxtLink to="/admin/categories" class="stat-link">Gestionar</NuxtLink>
                 </div>
             </div>
+
+
 
             <div class="stat-card urgent" :class="{ 'has-pending': summary?.pendingOrders > 0 }">
                 <div class="stat-icon orders-icon">⏳</div>
