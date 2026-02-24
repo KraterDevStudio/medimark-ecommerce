@@ -6,6 +6,9 @@ export interface Product {
     description: string;
     category: string;
     is_archived?: boolean;
+    discount_percentage?: number;
+    sale_start_date?: string;
+    sale_end_date?: string;
     categories?: { id: number; name: string; slug: string }[];
 }
 
@@ -53,9 +56,21 @@ export const useCart = () => {
         storeCart()
     }
 
+    const getEffectivePrice = (product: Product) => {
+        const basePrice = Number(product.price);
+        if (!product.discount_percentage || product.discount_percentage <= 0) return basePrice;
+
+        const now = new Date();
+        if (product.sale_start_date && new Date(product.sale_start_date) > now) return basePrice;
+        if (product.sale_end_date && new Date(product.sale_end_date) < now) return basePrice;
+
+        const discount = basePrice * (product.discount_percentage / 100);
+        return basePrice - discount;
+    }
+
     const total = computed(() => {
         return items.value.reduce((sum: number, item: CartItem) => {
-            const price = Number(item.price)
+            const price = getEffectivePrice(item)
             const qty = Number(item.quantity)
             return sum + (price * qty)
         }, 0)
@@ -83,5 +98,5 @@ export const useCart = () => {
         return items.value.find((i: CartItem) => i.id === id)?.quantity || 0
     }
 
-    return { items, addToCart, removeFromCart, updateQuantity, clearCart, total, cartCount, formatPrice, loadCart, getItemQuantity }
+    return { items, addToCart, removeFromCart, updateQuantity, clearCart, total, cartCount, formatPrice, loadCart, getItemQuantity, getEffectivePrice }
 }

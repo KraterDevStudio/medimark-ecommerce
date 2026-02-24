@@ -1,6 +1,18 @@
 <template>
   <div class="admin-dashboard">
     <div class="actions-bar">
+      <div class="refresh-plus-search">
+        <button @click="hardRefresh()" :disabled="pending" class="btn refresh">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+            <!--Boxicons v3.0.8 https://boxicons.com | License  https://docs.boxicons.com/free-->
+            <path
+              d="M19.07 4.93a9.9 9.9 0 0 0-3.18-2.14A9.95 9.95 0 0 0 12 2v2c1.08 0 2.13.21 3.11.63.95.4 1.81.98 2.54 1.71s1.31 1.59 1.72 2.54c.42.99.63 2.03.63 3.11s-.21 2.13-.63 3.11c-.4.95-.98 1.81-1.72 2.54-.17.17-.34.32-.52.48L15 15.99v6h6l-2.45-2.45c.18-.15.36-.31.52-.48.92-.92 1.64-1.99 2.14-3.18.52-1.23.79-2.54.79-3.89s-.26-2.66-.79-3.89a9.9 9.9 0 0 0-2.14-3.18ZM4.93 19.07c.92.92 1.99 1.64 3.18 2.14 1.23.52 2.54.79 3.89.79v-2a7.9 7.9 0 0 1-3.11-.63c-.95-.4-1.81-.98-2.54-1.71s-1.31-1.59-1.72-2.54c-.42-.99-.63-2.03-.63-3.11s.21-2.13.63-3.11c.4-.95.98-1.81 1.72-2.54.17-.17.34-.32.52-.48L9 8.01V2H3l2.45 2.45c-.18.15-.36.31-.52.48-.92.92-1.64 1.99-2.14 3.18C2.27 9.34 2 10.65 2 12s.26 2.66.79 3.89c.5 1.19 1.22 2.26 2.14 3.18">
+            </path>
+          </svg>
+        </button>
+        <input @input="e => handleSearchInput((e.target as HTMLInputElement).value)" type="text" :value="searchQuery"
+          placeholder="Buscar producto" />
+      </div>
       <button @click="openCreateModal()" :disabled="pending" class="btn btn-action-mobile">+ Nuevo Producto</button>
     </div>
 
@@ -17,10 +29,11 @@
             <th>Nombre</th>
             <th>Categoría</th>
             <th>Precio</th>
+            <th>Descuento</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="product in products" :key="product.id">
+          <tr v-for="product in displayedProducts" :key="product.id">
             <td>
               <div class="action-menu-container">
                 <button @click.stop="toggleMenu(product.id)" class="btn-dots">
@@ -46,7 +59,17 @@
               <span v-if="product.is_archived" class="badge badge-archived">Archivado</span>
             </td>
             <td>{{ product.category }}</td>
-            <td>{{ formatPrice(product.price) }}</td>
+            <td>
+              <span v-if="product.discount_percentage && product.discount_percentage > 0" class="original-price">{{
+                formatPrice(product.price) }}</span>
+              {{ formatPrice(product.price * (1 - (product.discount_percentage || 0) / 100)) }}
+            </td>
+            <td>
+              <span v-if="product.discount_percentage && product.discount_percentage > 0" class="badge badge-sale">
+                {{ product.discount_percentage }}% Off
+              </span>
+              <span v-else>-</span>
+            </td>
 
           </tr>
         </tbody>
@@ -75,6 +98,23 @@
             <div class="form-group">
               <label>Precio</label>
               <input v-model="form.price" type="number" step="0.01" required />
+            </div>
+
+            <div class="form-group">
+              <label>Descuento (%)</label>
+              <input v-model="form.discount_percentage" type="number" min="0" max="100" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Inicio de Oferta</label>
+              <input v-model="form.sale_start_date" type="datetime-local" />
+            </div>
+
+            <div class="form-group">
+              <label>Fin de Oferta</label>
+              <input v-model="form.sale_end_date" type="datetime-local" />
             </div>
           </div>
 
@@ -126,9 +166,12 @@ definePageMeta({
   middleware: 'admin'
 })
 
-
 const { data: products, refresh, pending } = await useLazyFetch<Product[]>('/api/products')
 const { formatPrice } = useCart()
+
+const hardRefresh = async () => {
+  await refresh({ hardRefresh: true })
+}
 
 const form = reactive({
   id: null as string | null,
@@ -136,7 +179,10 @@ const form = reactive({
   price: '',
   categoryIds: [] as number[],
   image: 'https://placehold.co/600x400',
-  description: ''
+  description: '',
+  discount_percentage: '' as string | number,
+  sale_start_date: '',
+  sale_end_date: ''
 })
 
 const isEditing = ref(false)
@@ -144,6 +190,33 @@ const showModal = ref(false)
 const loading = ref(false)
 const activeMenu = ref<string | null>(null)
 const router = useRouter()
+const searchQuery = ref('')
+const searchResults = ref<any[]>([])
+const isSearchLoading = ref(false)
+let searchTimeout: any = null
+const displayedProducts = ref<Product[]>([])
+
+watch(products, (newProducts) => {
+  if (newProducts) {
+    displayedProducts.value = [...newProducts] // shallow copy
+  }
+}, { immediate: true })
+
+// create handleSearchInput but with local data
+const handleSearchInput = (val: string) => {
+  searchQuery.value = val
+  if (searchTimeout) clearTimeout(searchTimeout)
+
+  searchTimeout = setTimeout(() => {
+    displayedProducts.value = products.value?.filter(product =>
+      normalizeString(product.title).includes(normalizeString(val))
+    )
+  }, 200)
+}
+
+const normalizeString = (str: string) => {
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
 
 const toggleMenu = (id: string) => {
   activeMenu.value = activeMenu.value === id ? null : id
@@ -192,6 +265,9 @@ const openCreateModal = () => {
   form.categoryIds = []
   form.image = 'https://placehold.co/600x400'
   form.description = ''
+  form.discount_percentage = ''
+  form.sale_start_date = ''
+  form.sale_end_date = ''
   showModal.value = true
 }
 
@@ -203,6 +279,18 @@ const openEditModal = (product: Product) => {
   form.categoryIds = product.categories?.map((cat: any) => cat.id) || []
   form.image = product.image
   form.description = product.description
+  form.discount_percentage = product.discount_percentage || ''
+
+  // Format dates for datetime-local input (YYYY-MM-DDThh:mm)
+  const formatDatetime = (dateString?: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+  };
+
+  form.sale_start_date = formatDatetime(product.sale_start_date)
+  form.sale_end_date = formatDatetime(product.sale_end_date)
+
   showModal.value = true
 }
 
@@ -258,9 +346,30 @@ const saveProduct = async () => {
     const url = '/api/products'
     const method = isEditing.value ? 'PUT' : 'POST'
 
+    // Create a copy of the form to clean up empty dates
+    const payload = { ...form };
+
+    // If discount is empty, set to 0
+    if (payload.discount_percentage === '') {
+      payload.discount_percentage = 0;
+    }
+
+    // Ensure date payloads are either formatted proper ISO strings or nulls (for empty values)
+    if (!payload.sale_start_date) {
+      (payload.sale_start_date as any) = null;
+    } else {
+      payload.sale_start_date = new Date(payload.sale_start_date).toISOString();
+    }
+
+    if (!payload.sale_end_date) {
+      (payload.sale_end_date as any) = null;
+    } else {
+      payload.sale_end_date = new Date(payload.sale_end_date).toISOString();
+    }
+
     await $fetch(url, {
       method,
-      body: form
+      body: payload
     })
     await refresh()
     closeModal()
@@ -300,7 +409,55 @@ const saveProduct = async () => {
 .actions-bar {
   margin-bottom: 2rem;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+
+  @media(max-width: 768px) {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  button {
+    justify-self: flex-end;
+  }
+
+  .refresh-plus-search {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    @media(max-width: 768px) {
+      width: 100%;
+    }
+  }
+
+  /* show  refresh button inside of the input, to the left*/
+  .refresh {
+    margin: 0;
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 0.5rem 0 0 0.5rem;
+
+    @media(max-width: 768px) {
+      margin-right: 0;
+    }
+  }
+
+  input {
+    justify-self: flex-start;
+    width: 500px;
+    padding: 0.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0 0.5rem 0.5rem 0;
+
+    @media(max-width: 768px) {
+      width: 100%;
+    }
+  }
 }
 
 .table-container {
@@ -358,6 +515,19 @@ const saveProduct = async () => {
   background-color: #f3f4f6;
   color: #4b5563;
   border: 1px solid #d1d5db;
+}
+
+.badge-sale {
+  background-color: #fef2f2;
+  color: #ef4444;
+  border: 1px solid #fecaca;
+}
+
+.original-price {
+  text-decoration: line-through;
+  color: #9ca3af;
+  font-size: 0.875rem;
+  margin-right: 0.5rem;
 }
 
 .action-menu-container {
@@ -516,6 +686,7 @@ label {
 input[type="text"],
 input[type="number"],
 input[type="url"],
+input[type="datetime-local"],
 textarea {
   padding: 0.75rem;
   border: 1px solid var(--color-border);

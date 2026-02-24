@@ -2,6 +2,10 @@
   <div class="product-card">
     <div class="image-wrapper">
       <NuxtLink :to="`/products/${product.id}`">
+        <div v-if="product.discount_percentage && getEffectivePrice(product) < product.price"
+          class="floating-badge-sale">
+          {{ product.discount_percentage }}% OFF
+        </div>
         <img :src="product.image" :alt="product.title" loading="lazy" />
       </NuxtLink>
     </div>
@@ -16,8 +20,12 @@
         <span v-if="!product.categories || product.categories.length === 0">{{ product.category }}</span>
       </p>
       <div class="footer">
-        <span class="price">{{ formatPrice(product.price) }}</span>
-
+        <div class="price-container">
+          <span v-if="getEffectivePrice(product) < product.price" class="original-price">{{ formatPrice(product.price)
+          }}</span>
+          <span class="price" :class="{ 'price-on-sale': getEffectivePrice(product) < product.price }">{{
+            formatPrice(getEffectivePrice(product)) }}</span>
+        </div>
         <div v-if="quantity > 0" class="quantity-selector">
           <button class="btn-qty" @click="updateQuantity(product.id, quantity - 1)">-</button>
           <span class="quantity-value">{{ quantity }}</span>
@@ -36,12 +44,26 @@ const props = defineProps<{
   product: Product
 }>()
 
-const { addToCart, updateQuantity, getItemQuantity, formatPrice } = useCart()
+const { addToCart, updateQuantity, getItemQuantity, formatPrice, getEffectivePrice } = useCart()
 
 const quantity = computed(() => getItemQuantity(props.product.id))
 </script>
 
 <style scoped>
+.floating-badge-sale {
+  opacity: 0.8;
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  background-color: var(--color-red-sale);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  z-index: 99999;
+  font-weight: 600;
+}
+
 .product-card {
   border: 1px solid var(--color-border);
   border-radius: 0.5rem;
@@ -105,11 +127,40 @@ const quantity = computed(() => getItemQuantity(props.product.id))
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.price-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.original-price {
+  text-decoration: line-through;
+  color: #9ca3af;
+  font-size: 0.875rem;
+  line-height: 1;
 }
 
 .price {
   font-weight: 700;
   font-size: 1.125rem;
+  color: var(--color-text-price);
+}
+
+.price-on-sale {
+  color: var(--color-red-sale);
+}
+
+.badge-sale {
+  background-color: #fef2f2;
+  color: #ef4444;
+  border: 1px solid #fecaca;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 .btn-sm {

@@ -1,13 +1,18 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
-    const { category, search } = getQuery(event)
+    const { category, search, hardRefresh } = getQuery(event)
     const storage = useStorage('cache')
 
     // Check if user is admin
     const user = await serverSupabaseUser(event)
     const client = await serverSupabaseClient(event)
     let isAdmin = false
+
+    // if hardRefresh is true and user is admin, delete all products from cache
+    if (hardRefresh && user?.role === 'admin') {
+        await storage.removeItem('products_admin_*')
+    }
 
     if (user) {
         const { data: profile } = await client

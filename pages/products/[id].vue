@@ -12,7 +12,14 @@
           <span v-if="!product.categories || product.categories.length === 0">{{ product.category }}</span>
         </span>
         <h1 class="title">{{ product.title }}</h1>
-        <p class="price">{{ formatPrice(product.price) }}</p>
+        <div class="price-container">
+          <span v-if="getEffectivePrice(product) < product.price" class="original-price">{{ formatPrice(product.price)
+            }}</span>
+          <span class="price">{{ formatPrice(getEffectivePrice(product)) }}</span>
+          <span v-if="product.discount_percentage && getEffectivePrice(product) < product.price" class="badge-sale">
+            {{ product.discount_percentage }}% Off
+          </span>
+        </div>
         <p class="description">{{ product.description }}</p>
 
         <div class="actions">
@@ -44,7 +51,7 @@ import type { Product } from '~/composables/useCart'
 const route = useRoute()
 const { data: products, pending } = await useLazyFetch<Product[]>('/api/products')
 const product = computed(() => products.value?.find(p => p.id === route.params.id))
-const { addToCart, formatPrice, updateQuantity, getItemQuantity } = useCart()
+const { addToCart, formatPrice, updateQuantity, getItemQuantity, getEffectivePrice } = useCart()
 
 const quantity = computed(() => product.value ? getItemQuantity(product.value.id) : 0)
 
@@ -109,8 +116,30 @@ useHead({
 .price {
   font-size: 1.5rem;
   font-weight: 700;
-  margin-bottom: 2rem;
   color: var(--color-text);
+}
+
+.price-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.original-price {
+  text-decoration: line-through;
+  color: #9ca3af;
+  font-size: 1.25rem;
+}
+
+.badge-sale {
+  background-color: #fef2f2;
+  color: #ef4444;
+  border: 1px solid #fecaca;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 600;
 }
 
 .description {
