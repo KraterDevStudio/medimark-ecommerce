@@ -35,6 +35,7 @@ export default defineEventHandler(async (event) => {
             price: Number(body.price),
             description: body.description,
             image: body.image,
+            varieties: body.varieties || [],
             is_archived: body.is_archived
         })
         .eq('id', body.id)

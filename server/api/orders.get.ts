@@ -36,6 +36,7 @@ export default defineEventHandler(async (event) => {
         product_title,
         product_price,
         product_image,
+        selected_variety,
         quantity,
         subtotal
       )
@@ -52,6 +53,7 @@ export default defineEventHandler(async (event) => {
         product_title,
         product_price,
         product_image,
+        selected_variety,
         quantity,
         subtotal
       )
@@ -86,6 +88,7 @@ export default defineEventHandler(async (event) => {
             title: item.product_title,
             price: item.product_price,
             image: item.product_image,
+            selectedVariety: item.selected_variety,
             quantity: item.quantity
         })),
         total: order.total,

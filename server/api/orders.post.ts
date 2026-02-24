@@ -102,6 +102,7 @@ export default defineEventHandler(async (event) => {
         product_title: item.title,
         product_price: item.price,
         product_image: item.image,
+        selected_variety: item.selectedVariety,
         quantity: item.quantity,
         subtotal: item.price * item.quantity
     }))
@@ -138,7 +139,7 @@ export default defineEventHandler(async (event) => {
 
             const itemsHtml = body.items.map((item: any) => `
                 <tr>
-                    <td style="padding: 8px; border: 1px solid #ddd;">${item.title}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">${item.title}${item.selectedVariety ? ` (${item.selectedVariety})` : ''}</td>
                     <td style="padding: 8px; border: 1px solid #ddd;">${item.quantity}</td>
                     <td style="padding: 8px; border: 1px solid #ddd;">$${item.price.toLocaleString()}</td>
                     <td style="padding: 8px; border: 1px solid #ddd;">$${(item.price * item.quantity).toLocaleString()}</td>

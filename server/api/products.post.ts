@@ -37,6 +37,7 @@ export default defineEventHandler(async (event) => {
             price: Number(body.price),
             description: body.description || null,
             image: body.image || null,
+            varieties: body.varieties || []
             // category column is deprecated/removed in favor of relationship
         })
         .select()

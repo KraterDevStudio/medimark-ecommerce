@@ -23,7 +23,9 @@
 
         <div class="order-items">
           <div v-for="item in order.items" :key="item.id" class="order-item">
-            <span>{{ item.quantity }}x {{ item.title }}</span>
+            <span>{{ item.quantity }}x {{ item.title }}
+              <small v-if="item.selectedVariety" class="variety-badge">{{
+                item.selectedVariety }}</small></span>
             <span>{{ formatPrice(item.price * item.quantity) }}</span>
           </div>
         </div>
@@ -156,5 +158,14 @@ const formatDate = (dateString: string) => {
   font-weight: 700;
   font-size: 1.125rem;
   color: var(--color-primary);
+}
+
+.variety-badge {
+  background: #f3f4f6;
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: #4b5563;
+  margin-left: 0.25rem;
 }
 </style>

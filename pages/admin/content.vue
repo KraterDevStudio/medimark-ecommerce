@@ -228,7 +228,7 @@ const closeModal = () => {
 
 const addProductToSection = () => {
     if (!selectedProductId.value) return
-    const prod = allProducts.value.find(p => p.id === parseInt(selectedProductId.value))
+    const prod = allProducts.value.find(p => p.id === selectedProductId.value)
     if (prod && !form.products.find(p => p.id === prod.id)) {
         form.products.push(prod)
     }

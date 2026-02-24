@@ -97,6 +97,12 @@
           </div>
 
           <div class="form-group">
+            <label>Variedades (opcional)</label>
+            <input v-model="form.varieties" type="text" placeholder="Ej: Azul, Verde, Rojo" />
+            <small class="help-text">Separa las opciones con comas.</small>
+          </div>
+
+          <div class="form-group">
             <label>Imagen</label>
             <input v-model="form.image" type="url" placeholder="https://..." required />
           </div>
@@ -136,7 +142,8 @@ const form = reactive({
   price: '',
   categoryIds: [] as number[],
   image: 'https://placehold.co/600x400',
-  description: ''
+  description: '',
+  varieties: ''
 })
 
 const isEditing = ref(false)
@@ -192,6 +199,7 @@ const openCreateModal = () => {
   form.categoryIds = []
   form.image = 'https://placehold.co/600x400'
   form.description = ''
+  form.varieties = ''
   showModal.value = true
 }
 
@@ -203,6 +211,7 @@ const openEditModal = (product: Product) => {
   form.categoryIds = product.categories?.map((cat: any) => cat.id) || []
   form.image = product.image
   form.description = product.description
+  form.varieties = product.varieties ? product.varieties.join(', ') : ''
   showModal.value = true
 }
 
@@ -258,9 +267,18 @@ const saveProduct = async () => {
     const url = '/api/products'
     const method = isEditing.value ? 'PUT' : 'POST'
 
+    // Parse the varieties string into an array, stripping whitespace, throwing out empty ones
+    const parsedVarieties = form.varieties
+      .split(',')
+      .map(v => v.trim())
+      .filter(v => v !== '')
+
     await $fetch(url, {
       method,
-      body: form
+      body: {
+        ...form,
+        varieties: parsedVarieties
+      }
     })
     await refresh()
     closeModal()
@@ -281,6 +299,12 @@ const saveProduct = async () => {
   width: 100%;
   margin-top: 2rem;
   color: #404040;
+}
+
+.help-text {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
 }
 
 .close-btn {

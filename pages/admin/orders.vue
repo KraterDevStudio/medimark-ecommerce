@@ -93,7 +93,10 @@
                 class="product-item">
                 <img :src="item.image" :alt="item.title" class="product-thumb" />
                 <div class="product-info">
-                  <span class="product-title">{{ item.title }}</span>
+                  <span class="product-title">{{ item.title }}
+                    <small v-if="item.selectedVariety" class="variety-badge">{{
+                      item.selectedVariety }}</small>
+                  </span>
                   <span class="product-meta">{{ item.quantity }} x {{ formatPrice(item.price) }}</span>
                 </div>
                 <span class="product-total">{{ formatPrice(item.price * item.quantity) }}</span>
@@ -138,23 +141,23 @@
                 </div>
                 <div class="form-group">
                   <label>Teléfono</label>
-                  <input v-model="orderForm.customerInfo.phone" type="tel" required />
+                  <input v-model="orderForm.customerInfo.phone" type="tel" />
                 </div>
                 <div class="form-group">
                   <label>Provincia</label>
-                  <input v-model="orderForm.customerInfo.province" type="text" required />
+                  <input v-model="orderForm.customerInfo.province" type="text" />
                 </div>
                 <div class="form-group full-width">
                   <label>Dirección</label>
-                  <input v-model="orderForm.customerInfo.address" type="text" required />
+                  <input v-model="orderForm.customerInfo.address" type="text" />
                 </div>
                 <div class="form-group">
                   <label>Ciudad</label>
-                  <input v-model="orderForm.customerInfo.city" type="text" required />
+                  <input v-model="orderForm.customerInfo.city" type="text" />
                 </div>
                 <div class="form-group">
                   <label>Código Postal</label>
-                  <input v-model="orderForm.customerInfo.postalCode" type="text" required />
+                  <input v-model="orderForm.customerInfo.postalCode" type="text" />
                 </div>
               </div>
             </div>
@@ -162,10 +165,16 @@
             <div class="section">
               <h3>Productos</h3>
               <div class="add-product-row">
-                <select v-model="selectedProductId" class="form-select">
+                <select @click="selectProduct($event)" v-model="selectedProductId" class="form-select">
                   <option value="">Seleccionar producto...</option>
                   <option v-for="p in allProducts" :key="p.id" :value="p.id">
                     {{ p.title }} - {{ formatPrice(p.price) }}
+                  </option>
+                </select>
+                <select v-if="selectedProduct && selectedProduct.varieties.length > 0" class="form-select">
+                  <option value="">Seleccionar variedad...</option>
+                  <option v-for="v in selectedProduct.varieties" :key="v.id" :value="v.id">
+                    {{ v }}
                   </option>
                 </select>
                 <input v-model.number="selectedProductQuantity" type="number" min="1" class="qty-input" />
@@ -176,11 +185,12 @@
                 <div v-for="item in orderForm.items" :key="item.id" class="selected-item">
                   <img :src="item.image" :alt="item.title" class="item-thumb" />
                   <div class="item-info">
-                    <span class="item-title">{{ item.title }}</span>
-                    <span class="item-meta">{{ item.quantity }} x {{ formatPrice(item.price) }}</span>
+                    <h4 class="item-title">{{ item.title }} <small v-if="item.selectedVariety" class="variety-badge">{{
+                      item.selectedVariety }}</small></h4>
+                    <p class="item-price">{{ formatPrice(item.price) }} x {{ item.quantity }}</p>
                   </div>
                   <div class="item-actions">
-                    <span class="item-total">{{ formatPrice(item.price * item.quantity) }}</span>
+                    <span class="item-subtotal">{{ formatPrice(item.price * item.quantity) }}</span>
                     <button type="button" class="btn-remove" @click="removeProduct(item.id)">&times;</button>
                   </div>
                 </div>
@@ -246,6 +256,7 @@ interface Order {
     price: number
     image: string
     quantity: number
+    selectedVariety?: string
   }>
 }
 
@@ -255,7 +266,8 @@ interface Product {
   price: number
   image: string
   description?: string
-  categories?: any[]
+  categories?: any[],
+  varieties?: any[],
 }
 
 const { data: orders, refresh, pending } = await useLazyFetch<Order[]>('/api/orders')
@@ -265,6 +277,7 @@ const selectedOrder = ref<Order | null>(null)
 
 // Order Creation State
 const showCreateModal = ref(false)
+const selectedProduct = ref<Product | undefined>(undefined)
 const submitting = ref(false)
 const orderForm = reactive({
   customerInfo: {
@@ -283,6 +296,12 @@ const orderForm = reactive({
 
 const selectedProductId = ref('')
 const selectedProductQuantity = ref(1)
+
+const selectProduct = (event: Event) => {
+  const productId = (event.target as HTMLSelectElement).value
+  const product = allProducts?.value?.find(p => p.id === productId)
+  selectedProduct.value = product
+}
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('es-ES', {
@@ -336,6 +355,7 @@ const addProduct = () => {
   calculateTotal()
   selectedProductId.value = ''
   selectedProductQuantity.value = 1
+  selectedProduct.value = undefined
 }
 
 const removeProduct = (id: string) => {
@@ -413,6 +433,14 @@ const getStatusClass = (status: string) => {
 </script>
 
 <style scoped>
+.variety-badge {
+  background-color: var(--color-primary);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 1rem;
+  font-size: 10px;
+}
+
 .info-total {
   display: flex;
   justify-content: start;

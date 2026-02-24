@@ -9,20 +9,17 @@
 
     <div v-else class="cart-content">
       <div class="cart-items">
-        <div v-for="item in items" :key="item.id" class="cart-item">
+        <div v-for="item in items" :key="item.cartItemId" class="cart-item">
           <img :src="item.image" :alt="item.title" class="item-image" />
           <div class="item-details">
-            <h3>{{ item.title }}</h3>
+            <h3>{{ item.title }} <small v-if="item.selectedVariety" class="variety-badge">{{ item.selectedVariety
+                }}</small></h3>
             <p class="price">{{ formatPrice(item.price) }}</p>
           </div>
           <div class="item-actions">
-            <input 
-              type="number" 
-              min="1" 
-              :value="item.quantity" 
-              @change="updateQuantity(item.id, Number(($event.target as HTMLInputElement).value))"
-            />
-            <button @click="removeFromCart(item.id)" class="remove-btn">Eliminar</button>
+            <input type="number" min="1" :value="item.quantity"
+              @change="updateQuantity(item.cartItemId, Number(($event.target as HTMLInputElement).value))" />
+            <button @click="removeFromCart(item.cartItemId)" class="remove-btn">Eliminar</button>
           </div>
         </div>
       </div>
@@ -200,5 +197,15 @@ h1 {
 
 .btn-clear:hover {
   background-color: #f9fafb;
+}
+
+.variety-badge {
+  background: #f3f4f6;
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: #4b5563;
+  margin-left: 0.5rem;
+  font-weight: normal;
 }
 </style>

@@ -7,27 +7,31 @@ export interface Product {
     category: string;
     is_archived?: boolean;
     categories?: { id: number; name: string; slug: string }[];
+    varieties?: string[];
 }
 
 export interface CartItem extends Product {
+    cartItemId: string; // id + selectedVariety
+    selectedVariety?: string | null;
     quantity: number;
 }
 
 export const useCart = () => {
     const items = useState<CartItem[]>('cart-items', () => [])
 
-    const addToCart = (product: Product) => {
-        const existing = items.value.find((i: CartItem) => i.id === product.id)
+    const addToCart = (product: Product, selectedVariety: string | null = null) => {
+        const cartItemId = selectedVariety ? `${product.id}-${selectedVariety}` : product.id;
+        const existing = items.value.find((i: CartItem) => i.cartItemId === cartItemId)
         if (existing) {
             existing.quantity++
         } else {
-            items.value.push({ ...product, quantity: 1 })
+            items.value.push({ ...product, quantity: 1, cartItemId, selectedVariety })
         }
         storeCart()
     }
 
-    const removeFromCart = (id: string) => {
-        items.value = items.value.filter((i: CartItem) => i.id !== id)
+    const removeFromCart = (cartItemId: string) => {
+        items.value = items.value.filter((i: CartItem) => i.cartItemId !== cartItemId)
         storeCart()
     }
 
@@ -36,11 +40,11 @@ export const useCart = () => {
         localStorage.setItem('cart', JSON.stringify(items.value))
     }
 
-    const updateQuantity = (id: string, quantity: number) => {
-        const item = items.value.find((i: CartItem) => i.id === id)
+    const updateQuantity = (cartItemId: string, quantity: number) => {
+        const item = items.value.find((i: CartItem) => i.cartItemId === cartItemId)
         if (item) {
             if (quantity <= 0) {
-                removeFromCart(id)
+                removeFromCart(cartItemId)
             } else {
                 item.quantity = quantity
             }
@@ -79,8 +83,8 @@ export const useCart = () => {
         }
     }
 
-    const getItemQuantity = (id: string) => {
-        return items.value.find((i: CartItem) => i.id === id)?.quantity || 0
+    const getItemQuantity = (cartItemId: string) => {
+        return items.value.find((i: CartItem) => i.cartItemId === cartItemId)?.quantity || 0
     }
 
     return { items, addToCart, removeFromCart, updateQuantity, clearCart, total, cartCount, formatPrice, loadCart, getItemQuantity }
