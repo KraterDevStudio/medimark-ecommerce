@@ -42,7 +42,7 @@ export default defineEventHandler(async (event) => {
 
     // If filtering, add an inner join to filter by category slug
     // We use a separate alias 'filter_categories' so we don't restrict the 'categories' array
-    if (category) {
+    if (category && category !== 'all') {
         selectQuery += `,
             filter_categories:product_categories!inner(
                 category:categories!inner(slug)
@@ -54,7 +54,7 @@ export default defineEventHandler(async (event) => {
         .from('products')
         .select(selectQuery)
 
-    if (category) {
+    if (category && category !== 'all') {
         query = query.eq('filter_categories.category.slug', category)
     }
 
