@@ -1,5 +1,6 @@
 import { readBody, createError } from 'h3'
 import { serverSupabaseServiceRole, serverSupabaseUser } from '#supabase/server'
+import { calculateCouponDiscount, isCouponValidNow, normalizeCouponCode, roundMoney, type CouponRecord } from '~/server/utils/coupons'
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
@@ -67,6 +68,45 @@ export default defineEventHandler(async (event) => {
         }
     }
 
+    const subtotal = roundMoney(Number(body.total || 0))
+    if (!Number.isFinite(subtotal) || subtotal < 0) {
+        throw createError({ statusCode: 400, statusMessage: 'Order total is invalid' })
+    }
+
+    let appliedCouponCode: string | null = null
+    let discountAmount = 0
+
+    if (body.couponCode) {
+        const normalizedCode = normalizeCouponCode(body.couponCode)
+
+        const { data: coupon, error: couponError } = await client
+            .from('coupons')
+            .select('*')
+            .eq('code', normalizedCode)
+            .maybeSingle()
+
+        if (couponError) {
+            throw createError({
+                statusCode: 500,
+                statusMessage: 'Failed to validate coupon',
+                data: couponError
+            })
+        }
+
+        if (!coupon) {
+            throw createError({ statusCode: 400, statusMessage: 'Coupon not found' })
+        }
+
+        if (!isCouponValidNow(coupon as CouponRecord)) {
+            throw createError({ statusCode: 400, statusMessage: 'Coupon is not active or has expired' })
+        }
+
+        discountAmount = calculateCouponDiscount(coupon as CouponRecord, subtotal)
+        appliedCouponCode = normalizedCode
+    }
+
+    const finalTotal = roundMoney(Math.max(0, subtotal - discountAmount))
+
     // Create order
     const { data: order, error: orderError } = await client
         .from('orders')
@@ -80,7 +120,9 @@ export default defineEventHandler(async (event) => {
             customer_city: city,
             customer_postal_code: postalCode,
             customer_province: province,
-            total: body.total,
+            total: finalTotal,
+            coupon_code: appliedCouponCode,
+            discount_amount: discountAmount,
             payment_method: body.paymentMethod || 'transferencia',
             status: 'Pendiente'
         })
@@ -137,6 +179,27 @@ export default defineEventHandler(async (event) => {
         })
     }
 
+    if (appliedCouponCode) {
+        const { data: usedCoupon, error: couponReadError } = await client
+            .from('coupons')
+            .select('current_uses')
+            .eq('code', appliedCouponCode)
+            .maybeSingle()
+
+        if (couponReadError) {
+            console.error('Failed to read coupon usage:', couponReadError)
+        } else if (usedCoupon) {
+            const { error: couponUpdateError } = await client
+                .from('coupons')
+                .update({ current_uses: Number(usedCoupon.current_uses || 0) + 1 })
+                .eq('code', appliedCouponCode)
+
+            if (couponUpdateError) {
+                console.error('Failed to increment coupon usage:', couponUpdateError)
+            }
+        }
+    }
+
     // Send email notification to admin
     const config = useRuntimeConfig()
     if (config.adminEmail && config.smtpHost) {
@@ -173,7 +236,10 @@ export default defineEventHandler(async (event) => {
                 html: `
                     <h2>Nuevo Pedido Recibido</h2>
                     <p><strong>Nro de Pedido:</strong> #${order.id}</p>
-                    <p><strong>Total:</strong> $${body.total.toLocaleString()}</p>
+                    <p><strong>Subtotal:</strong> $${subtotal.toLocaleString()}</p>
+                    <p><strong>Descuento:</strong> $${discountAmount.toLocaleString()}</p>
+                    <p><strong>Total:</strong> $${finalTotal.toLocaleString()}</p>
+                    ${appliedCouponCode ? `<p><strong>Coupon:</strong> ${appliedCouponCode}</p>` : ''}
                     
                     <h3>Datos del Cliente</h3>
                     <p><strong>Nombre:</strong> ${customerInfo.name}</p>
@@ -206,5 +272,5 @@ export default defineEventHandler(async (event) => {
         }
     }
 
-    return { success: true, orderId: order.id }
+    return { success: true, orderId: order.id, total: finalTotal, discountAmount, couponCode: appliedCouponCode }
 })

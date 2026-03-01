@@ -22,8 +22,8 @@
           </div>
           <div class="item-actions">
             <input type="number" min="1" :value="item.quantity"
-              @change="updateQuantity(item.id, Number(($event.target as HTMLInputElement).value))" />
-            <button @click="removeFromCart(item.id)" class="remove-btn">Eliminar</button>
+              @change="updateQuantity(item.cartItemId, Number(($event.target as HTMLInputElement).value))" />
+            <button @click="removeFromCart(item.cartItemId)" class="remove-btn">Eliminar</button>
           </div>
         </div>
       </div>
@@ -34,10 +34,22 @@
           <span>Subtotal</span>
           <span>{{ formatPrice(total) }}</span>
         </div>
+        <div class="coupon-row">
+          <input v-model="couponCode" type="text" placeholder="Código de cupón" />
+          <button class="btn-apply" @click="applyCoupon" :disabled="couponLoading">
+            {{ couponLoading ? 'Aplicando...' : 'Aplicar' }}
+          </button>
+        </div>
+        <p v-if="couponError" class="coupon-error">{{ couponError }}</p>
+        <div v-if="appliedCoupon" class="summary-row discount">
+          <span>Descuento ({{ appliedCoupon.code }})</span>
+          <span>-{{ formatPrice(discountAmount) }}</span>
+        </div>
         <div class="summary-row total">
           <span>Total</span>
-          <span>{{ formatPrice(total) }}</span>
+          <span>{{ formatPrice(totalAfterDiscount) }}</span>
         </div>
+        <button v-if="appliedCoupon" @click="clearCouponSelection" class="btn-clear-coupon">Quitar cupón</button>
         <button @click="checkout" class="btn btn-block">
           Proceder al Pago
         </button>
@@ -48,8 +60,54 @@
 </template>
 
 <script setup lang="ts">
-const { items, removeFromCart, updateQuantity, clearCart, total, formatPrice, getEffectivePrice } = useCart()
+const {
+  items,
+  removeFromCart,
+  updateQuantity,
+  clearCart,
+  total,
+  totalAfterDiscount,
+  discountAmount,
+  appliedCoupon,
+  setCoupon,
+  clearCoupon,
+  formatPrice,
+  getEffectivePrice
+} = useCart()
 const router = useRouter()
+
+const couponCode = ref('')
+const couponError = ref('')
+const couponLoading = ref(false)
+
+const applyCoupon = async () => {
+  couponLoading.value = true
+  couponError.value = ''
+
+  try {
+    const response = await $fetch('/api/coupons/validate', {
+      method: 'POST',
+      body: {
+        code: couponCode.value,
+        subtotal: total.value
+      }
+    })
+
+    setCoupon(response.coupon)
+    couponCode.value = response.coupon.code
+  } catch (e: any) {
+    clearCoupon()
+    couponError.value = e?.data?.message || e?.statusMessage || 'Cupón inválido'
+  } finally {
+    couponLoading.value = false
+  }
+}
+
+const clearCouponSelection = () => {
+  clearCoupon()
+  couponCode.value = ''
+  couponError.value = ''
+}
 
 const checkout = () => {
   if (items.value.length === 0) return
@@ -189,6 +247,47 @@ h1 {
   padding-top: 1rem;
   border-top: 1px solid var(--color-border);
   margin-bottom: 1.5rem;
+}
+
+.summary-row.discount {
+  color: #15803d;
+}
+
+.coupon-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.coupon-row input {
+  flex: 1;
+  border: 1px solid var(--color-border);
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.btn-apply {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+}
+
+.coupon-error {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+}
+
+.btn-clear-coupon {
+  width: 100%;
+  margin-bottom: 0.75rem;
+  background: transparent;
+  border: 1px dashed var(--color-border);
+  padding: 0.6rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
 }
 
 .btn-block {

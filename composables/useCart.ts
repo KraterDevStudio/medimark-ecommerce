@@ -22,8 +22,17 @@ export interface CartItem extends Product {
     quantity: number;
 }
 
+export interface AppliedCoupon {
+    id: string;
+    code: string;
+    type: 'percentage' | 'fixed';
+    value: number;
+    discountAmount: number;
+}
+
 export const useCart = () => {
     const items = useState<CartItem[]>('cart-items', () => [])
+    const appliedCoupon = useState<AppliedCoupon | null>('cart-coupon', () => null)
 
     const addToCart = (product: Product, selectedVariety: string | null = null) => {
         const cartItemId = selectedVariety ? `${product.id}-${selectedVariety}` : product.id;
@@ -33,11 +42,13 @@ export const useCart = () => {
         } else {
             items.value.push({ ...product, quantity: 1, cartItemId, selectedVariety })
         }
+        appliedCoupon.value = null
         storeCart()
     }
 
     const removeFromCart = (cartItemId: string) => {
         items.value = items.value.filter((i: CartItem) => i.cartItemId !== cartItemId)
+        appliedCoupon.value = null
         storeCart()
     }
 
@@ -53,6 +64,7 @@ export const useCart = () => {
                 removeFromCart(cartItemId)
             } else {
                 item.quantity = quantity
+                appliedCoupon.value = null
             }
             storeCart()
         }
@@ -60,6 +72,7 @@ export const useCart = () => {
 
     const clearCart = () => {
         items.value = []
+        appliedCoupon.value = null
         storeCart()
     }
 
@@ -90,6 +103,15 @@ export const useCart = () => {
         }, 0)
     })
 
+    const discountAmount = computed(() => {
+        if (!appliedCoupon.value) return 0
+        return Math.min(total.value, Number(appliedCoupon.value.discountAmount || 0))
+    })
+
+    const totalAfterDiscount = computed(() => {
+        return Math.max(0, total.value - discountAmount.value)
+    })
+
     const cartCount = computed(() => {
         return items.value.reduce((sum: number, item: CartItem) => sum + Number(item.quantity), 0)
     })
@@ -108,9 +130,35 @@ export const useCart = () => {
         }
     }
 
+    const setCoupon = (coupon: AppliedCoupon) => {
+        appliedCoupon.value = coupon
+    }
+
+    const clearCoupon = () => {
+        appliedCoupon.value = null
+    }
+
     const getItemQuantity = (cartItemId: string) => {
         return items.value.find((i: CartItem) => i.cartItemId === cartItemId)?.quantity || 0
     }
 
-    return { items, addToCart, removeFromCart, updateQuantity, clearCart, total, cartCount, formatPrice, loadCart, getItemQuantity, getEffectivePrice, getOriginalPrice }
+    return {
+        items,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        clearCart,
+        total,
+        discountAmount,
+        totalAfterDiscount,
+        appliedCoupon,
+        setCoupon,
+        clearCoupon,
+        cartCount,
+        formatPrice,
+        loadCart,
+        getItemQuantity,
+        getEffectivePrice,
+        getOriginalPrice
+    }
 }

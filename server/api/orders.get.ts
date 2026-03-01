@@ -92,6 +92,9 @@ export default defineEventHandler(async (event) => {
             quantity: item.quantity
         })),
         total: order.total,
+        discountAmount: Number(order.discount_amount || 0),
+        couponCode: order.coupon_code || null,
+        subtotal: Number(order.total || 0) + Number(order.discount_amount || 0),
         paymentMethod: order.payment_method,
         date: order.created_at,
         status: order.status

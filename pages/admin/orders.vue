@@ -28,7 +28,14 @@
               </div>
             </td>
             <td>{{ formatDate(order.date) }}</td>
-            <td>{{ formatPrice(order.total) }}</td>
+            <td>
+              <div class="total-cell">
+                <span>{{ formatPrice(order.total) }}</span>
+                <small v-if="order.discountAmount > 0" class="discount-note">
+                  -{{ formatPrice(order.discountAmount) }} {{ order.couponCode ? `(${order.couponCode})` : '' }}
+                </small>
+              </div>
+            </td>
             <td>
               <div @click.stop>
                 <select :value="order.status"
@@ -105,6 +112,14 @@
           </div>
 
           <div class="order-summary">
+            <div class="summary-row">
+              <span>Subtotal:</span>
+              <span>{{ formatPrice(selectedOrder.subtotal || selectedOrder.total) }}</span>
+            </div>
+            <div v-if="selectedOrder.discountAmount > 0" class="summary-row discount">
+              <span>Descuento{{ selectedOrder.couponCode ? ` (${selectedOrder.couponCode})` : '' }}:</span>
+              <span>-{{ formatPrice(selectedOrder.discountAmount) }}</span>
+            </div>
             <div class="summary-row">
               <span>Método de Pago:</span>
               <span>{{ selectedOrder.paymentMethod }}</span>
@@ -239,6 +254,9 @@ interface Order {
   id: string
   date: string
   total: number
+  subtotal?: number
+  discountAmount?: number
+  couponCode?: string | null
   status: string
   paymentMethod: string
   customerInfo: {
@@ -712,6 +730,20 @@ const getStatusClass = (status: string) => {
   color: var(--color-text);
   font-size: 1.25rem;
   margin-top: 1rem;
+}
+
+.summary-row.discount {
+  color: #15803d;
+}
+
+.total-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.discount-note {
+  color: #15803d;
+  font-size: 0.75rem;
 }
 
 /* Form Styles */

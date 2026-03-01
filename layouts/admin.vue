@@ -30,6 +30,7 @@
         <NuxtLink to="/admin/categories" exact-active-class="active" @click="isSidebarOpen = false">Categorías
         </NuxtLink>
         <NuxtLink to="/admin/orders" exact-active-class="active" @click="isSidebarOpen = false">Órdenes</NuxtLink>
+        <NuxtLink to="/admin/coupons" exact-active-class="active" @click="isSidebarOpen = false">Cupones</NuxtLink>
         <NuxtLink to="/admin/content" exact-active-class="active" @click="isSidebarOpen = false">Contenido</NuxtLink>
         <NuxtLink to="/" target="_blank">
           <button class="btn">
@@ -82,6 +83,7 @@ const pageTitle = computed(() => {
   if (route.path === '/admin/collections') return 'Gestión de Colecciones'
   if (route.path.includes('/admin/edit')) return 'Editar Producto'
   if (route.path === '/admin/orders') return 'Gestionar Ordenes'
+  if (route.path === '/admin/coupons') return 'Gestionar Cupones'
   if (route.path === '/admin/categories') return 'Gestionar Categorías'
   if (route.path === '/admin/content') return 'Gestionar Contenido'
   return 'Resumen'

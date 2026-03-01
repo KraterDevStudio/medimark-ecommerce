@@ -16,9 +16,17 @@
             <div class="item-price">{{ formatPrice(item.price * item.quantity) }}</div>
           </div>
         </div>
+        <div class="summary-total-row">
+          <span>Subtotal</span>
+          <span>{{ formatPrice(total) }}</span>
+        </div>
+        <div v-if="appliedCoupon" class="summary-total-row discount-row">
+          <span>Descuento ({{ appliedCoupon.code }})</span>
+          <span>-{{ formatPrice(discountAmount) }}</span>
+        </div>
         <div class="summary-total">
           <span>Total</span>
-          <span class="total-amount">{{ formatPrice(total) }}</span>
+          <span class="total-amount">{{ formatPrice(totalAfterDiscount) }}</span>
         </div>
       </div>
 
@@ -125,7 +133,7 @@
 </template>
 
 <script setup lang="ts">
-const { items, clearCart, total, formatPrice } = useCart()
+const { items, clearCart, total, totalAfterDiscount, discountAmount, appliedCoupon, clearCoupon, formatPrice } = useCart()
 const { user } = useAuth()
 const router = useRouter()
 
@@ -152,6 +160,7 @@ const handleSubmit = async () => {
     const orderData = {
       items: items.value,
       total: total.value,
+      couponCode: appliedCoupon.value?.code || null,
       customerInfo: {
         name: formData.value.name,
         email: formData.value.email,
@@ -167,6 +176,7 @@ const handleSubmit = async () => {
 
     if (success) {
       clearCart()
+      clearCoupon()
       router.push(`/order-confirmation?orderId=${orderId}`)
     }
   } catch (e: any) {
@@ -280,6 +290,16 @@ h1 {
   border-top: 2px solid var(--color-border);
   font-size: 1.25rem;
   font-weight: 700;
+}
+
+.summary-total-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.discount-row {
+  color: #15803d;
 }
 
 .total-amount {

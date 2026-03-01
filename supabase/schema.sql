@@ -63,6 +63,8 @@ CREATE TABLE orders (
   customer_province TEXT NOT NULL,
   -- Order details
   total NUMERIC(10, 2) NOT NULL CHECK (total >= 0),
+  coupon_code TEXT,
+  discount_amount NUMERIC(10, 2) NOT NULL DEFAULT 0 CHECK (discount_amount >= 0),
   payment_method TEXT NOT NULL DEFAULT 'transferencia',
   status TEXT NOT NULL DEFAULT 'Pendiente' CHECK (status IN ('Pendiente', 'Paga', 'Completada', 'Cancelada')),
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -78,6 +80,7 @@ CREATE INDEX idx_orders_user_id ON orders(user_id);
 CREATE INDEX idx_orders_guest_email ON orders(guest_email);
 CREATE INDEX idx_orders_status ON orders(status);
 CREATE INDEX idx_orders_created_at ON orders(created_at DESC);
+CREATE INDEX idx_orders_coupon_code ON orders(coupon_code);
 
 -- ============================================
 -- 4. ORDER ITEMS TABLE (Normalized)
@@ -149,6 +152,27 @@ CREATE INDEX idx_order_items_order_id ON order_items(order_id);
 CREATE INDEX idx_order_items_product_id ON order_items(product_id);
 
 -- ============================================
+-- 4.1 COUPONS TABLE
+-- ============================================
+CREATE TABLE coupons (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  code TEXT UNIQUE NOT NULL,
+  type TEXT NOT NULL CHECK (type IN ('percentage', 'fixed')),
+  value NUMERIC(10, 2) NOT NULL CHECK (value > 0),
+  max_uses INTEGER DEFAULT NULL,
+  current_uses INTEGER DEFAULT 0,
+  valid_from TIMESTAMPTZ DEFAULT NOW(),
+  valid_to TIMESTAMPTZ DEFAULT NULL,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  CONSTRAINT coupons_percentage_max_value CHECK (type <> 'percentage' OR value <= 100)
+);
+
+CREATE INDEX idx_coupons_code ON coupons(code);
+CREATE INDEX idx_coupons_active_dates ON coupons(is_active, valid_from, valid_to);
+
+-- ============================================
 -- 5. AUTO-UPDATE TRIGGERS
 -- ============================================
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -176,6 +200,11 @@ CREATE TRIGGER update_user_profiles_updated_at
 
 CREATE TRIGGER update_orders_updated_at
   BEFORE UPDATE ON orders
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_coupons_updated_at
+  BEFORE UPDATE ON coupons
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
@@ -277,6 +306,19 @@ CREATE POLICY "Anyone can create orders"
 CREATE POLICY "Service role can manage orders"
   ON orders FOR ALL
   USING (auth.role() = 'service_role');
+
+ALTER TABLE coupons ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Coupons are viewable by everyone"
+  ON coupons FOR SELECT
+  USING (true);
+
+CREATE POLICY "Admin can manage coupons"
+  ON coupons FOR ALL
+  USING (auth.role() = 'service_role' OR EXISTS (
+    SELECT 1 FROM user_profiles
+    WHERE auth_user_id = auth.uid() AND role = 'admin'
+  ));
 
 -- Order Items: Accessible through orders
 ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;

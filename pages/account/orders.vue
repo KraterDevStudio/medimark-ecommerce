@@ -31,8 +31,20 @@
         </div>
 
         <div class="order-footer">
-          <span class="total-label">Subtotal</span>
-          <span class="total-value">{{ formatPrice(order.total) }}</span>
+          <div class="totals-breakdown">
+            <div class="line">
+              <span class="total-label">Subtotal</span>
+              <span>{{ formatPrice(order.subtotal || order.total) }}</span>
+            </div>
+            <div v-if="order.discountAmount > 0" class="line discount-line">
+              <span>Descuento{{ order.couponCode ? ` (${order.couponCode})` : '' }}</span>
+              <span>-{{ formatPrice(order.discountAmount) }}</span>
+            </div>
+            <div class="line total-line">
+              <span class="total-label">Total</span>
+              <span class="total-value">{{ formatPrice(order.total) }}</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -145,9 +157,27 @@ const formatDate = (dateString: string) => {
   padding: 1rem 1.5rem;
   background: var(--color-surface);
   border-top: 1px solid var(--color-border);
+}
+
+.totals-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.line {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+}
+
+.discount-line {
+  color: #15803d;
+}
+
+.total-line {
+  border-top: 1px solid var(--color-border);
+  margin-top: 0.25rem;
+  padding-top: 0.5rem;
 }
 
 .total-label {
